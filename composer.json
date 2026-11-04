@@ -1,0 +1,67 @@
+{
+    "name": "webware/skeleton",
+    "description": "Greenfield starter for Webware packages: shared tooling config, the organization's required CI workflow contract, and a containerized dev environment.",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "webware",
+        "mezzio",
+        "skeleton"
+    ],
+    "authors": [
+        {
+            "name": "Joey Smith",
+            "email": "jsmith@webinertia.net",
+            "role": "Developer"
+        }
+    ],
+    "extra": {
+        "laminas": {
+            "config-provider": "Webware\\Skeleton\\ConfigProvider"
+        }
+    },
+    "require": {
+        "php": "~8.4.1 || ~8.5.0",
+        "psr/container": "^2.0"
+    },
+    "require-dev": {
+        "infection/infection": "^0.35.0",
+        "phpbench/phpbench": "^1.7",
+        "phpunit/phpunit": "^13.4.4",
+        "roave/backward-compatibility-check": "^8.21.0",
+        "roave/security-advisories": "dev-master",
+        "webware/webware-tools": "^1.0.0-rc.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webware\\Skeleton\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WebwareTest\\Skeleton\\": "test/unit/",
+            "WebwareTestIntegration\\Skeleton\\": "test/integration/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.4.99"
+        },
+        "allow-plugins": {
+            "infection/extension-installer": true,
+            "laminas/laminas-component-installer": true
+        },
+        "github-protocols": [
+            "https"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit --no-coverage --colors=always --testsuite \"unit test\"",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml --coverage-text",
+        "test-integration": "phpunit --no-coverage --colors=always --testsuite \"integration test\"",
+        "mutation-test": "infection",
+        "test-all": "@test && @test-integration && @mutation-test"
+    }
+}

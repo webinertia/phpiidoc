@@ -1,0 +1,27 @@
+schema_version: "1.0"
+
+preset:
+  id: "webware-standard"
+  name: "Webware Standard"
+  version: "1.0.0"
+  description: "The Webware fleet constitution standard, resolved into every derived repository."
+  author: "webinertia"
+  repository: "https://github.com/webinertia/repo-template"
+  license: "MIT"
+
+requires:
+  speckit_version: ">=1.0.0"
+
+provides:
+  templates:
+    - type: "template"
+      name: "constitution-template"
+      file: "templates/constitution-template.md"
+      description: "Webware fleet constitution"
+      replaces: "constitution-template"
+      strategy: "replace"
+
+tags:
+  - "webware"
+  - "constitution"
+  - "standard"
