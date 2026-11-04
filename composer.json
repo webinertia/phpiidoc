@@ -1,11 +1,12 @@
 {
-    "name": "webware/skeleton",
-    "description": "Greenfield starter for Webware packages: shared tooling config, the organization's required CI workflow contract, and a containerized dev environment.",
+    "name": "phpiidoc/phpiidoc",
+    "description": "A PHP implementation of AsciiDoc, the plain-text markup language for technical documentation.",
     "license": "BSD-3-Clause",
     "keywords": [
-        "webware",
-        "mezzio",
-        "skeleton"
+        "asciidoc",
+        "asciidoctor",
+        "markup",
+        "parser"
     ],
     "authors": [
         {
@@ -16,7 +17,7 @@
     ],
     "extra": {
         "laminas": {
-            "config-provider": "Webware\\Skeleton\\ConfigProvider"
+            "config-provider": "Phpiidoc\\ConfigProvider"
         }
     },
     "require": {
@@ -33,13 +34,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Webware\\Skeleton\\": "src/"
+            "Phpiidoc\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "WebwareTest\\Skeleton\\": "test/unit/",
-            "WebwareTestIntegration\\Skeleton\\": "test/integration/"
+            "PhpiidocTest\\": "test/unit/",
+            "PhpiidocTestIntegration\\": "test/integration/"
         }
     },
     "minimum-stability": "dev",

@@ -1,4 +1,4 @@
-# webware/skeleton: Copilot Agent Instructions
+# phpiidoc/phpiidoc: Copilot Agent Instructions
 
 ## Read this before acting: fleet working agreements
 

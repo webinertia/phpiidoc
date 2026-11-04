@@ -1,8 +1,8 @@
-# webware/skeleton
+# phpiidoc/phpiidoc
 
-Greenfield starter for Webware packages: the shared tooling config, the organization's
-required CI workflow contract, and a containerized dev environment - so a new component
-starts aligned instead of being retrofitted.
+A PHP implementation of AsciiDoc, the plain-text markup language for technical
+documentation. The repository carries the shared tooling config, the organization's
+required CI workflow contract, and a containerized dev environment.
 
 > **The badges are fenced deliberately.** Un-fence the block below, replace every
 > placeholder with the derived repository's own coordinates, and delete this note.
@@ -49,10 +49,10 @@ Work the list top to bottom; the namespace rename is the one that bites, because
 `extra.laminas.config-provider` is a plain string that no tool validates for you.
 
 - [ ] `composer.json` - `name`, `description`, `keywords`
-- [ ] `composer.json` - `extra.laminas.config-provider` → the new FQCN
-- [ ] `composer.json` - both PSR-4 roots: `Webware\Skeleton\` → `src/` and the two `WebwareTest*` roots
+- [ ] `composer.json` - `extra.laminas.config-provider` -> the new FQCN
+- [ ] `composer.json` - the PSR-4 roots: `Phpiidoc\` -> `src/`, `PhpiidocTest\` -> `test/unit/`, `PhpiidocTestIntegration\` -> `test/integration/` (add `PhpiidocTestAsset\` -> `test/asset/` when that directory exists)
 - [ ] `src/`, `test/unit/`, `test/integration/` - namespaces and `use` statements
-- [ ] Every new file's header block - "This file is part of the Webware Skeleton package"
+- [ ] Every new file's header block - "This file is part of the Phpiidoc package"
 - [ ] `.github/copilot-instructions.md` - the title line
 - [ ] `README.md` - this title, the description, and the fenced badge block (un-fence it, replace the placeholders)
 - [ ] `LICENSE` - copyright holder and year

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Webware Skeleton package.
+ * This file is part of the Phpiidoc package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -12,13 +12,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace WebwareTestIntegration\Skeleton;
+namespace PhpiidocTestIntegration;
 
 use JsonException;
+use Phpiidoc\ConfigProvider;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Webware\Skeleton\ConfigProvider;
 
 use function file_get_contents;
 use function json_decode;
