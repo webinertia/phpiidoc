@@ -21,8 +21,25 @@ yet, and no AsciiDoc syntax is supported.
 
 ## Installation
 
+phpiidoc is published as a pre-release and its runtime graph is pre-release too
+(`webware/message-bus`, `webware/messagebus-event` and `webware/webware-console`), so the
+consuming project needs a global minimum stability: the `@alpha` flag on the requirement
+only relaxes stability for phpiidoc itself.
+
 ```shell
-composer require phpiidoc/phpiidoc
+composer config minimum-stability alpha
+composer config prefer-stable true
+composer require "phpiidoc/phpiidoc:^1.0@alpha"
+```
+
+The two `composer config` calls write these keys to your `composer.json`. `prefer-stable`
+keeps a stable release winning wherever one satisfies the constraint:
+
+```json
+{
+    "minimum-stability": "alpha",
+    "prefer-stable": true
+}
 ```
 
 `composer.json` declares `Phpiidoc\ConfigProvider` under `extra.laminas.config-provider`,
