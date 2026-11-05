@@ -21,26 +21,16 @@ yet, and no AsciiDoc syntax is supported.
 
 ## Installation
 
-phpiidoc is published as a pre-release and its runtime graph is pre-release too
-(`webware/message-bus`, `webware/messagebus-event` and `webware/webware-console`), so the
-consuming project needs a global minimum stability: the `@alpha` flag on the requirement
-only relaxes stability for phpiidoc itself.
-
 ```shell
-composer config minimum-stability alpha
-composer config prefer-stable true
-composer require "phpiidoc/phpiidoc:^1.0@alpha"
+composer require phpiidoc/phpiidoc
 ```
 
-The two `composer config` calls write these keys to your `composer.json`. `prefer-stable`
-keeps a stable release winning wherever one satisfies the constraint:
-
-```json
-{
-    "minimum-stability": "alpha",
-    "prefer-stable": true
-}
-```
+No stability flag is needed: phpiidoc and three of its runtime dependencies
+(`webware/message-bus`, `webware/messagebus-event` and `webware/webware-console`) are
+pre-release, so the consuming root must already allow pre-release stability, and the
+Webware application skeleton declares `"minimum-stability": "dev"` with
+`"prefer-stable": true`. Do not lower `minimum-stability` to `alpha`: it gains nothing for
+phpiidoc and narrows what the rest of the graph may resolve to.
 
 `composer.json` declares `Phpiidoc\ConfigProvider` under `extra.laminas.config-provider`,
 so a Mezzio or Laminas application merges the package config without further
