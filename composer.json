@@ -29,6 +29,7 @@
         "psr/container": "^2.0",
         "webware/message-bus": "^2.0.0-beta.7",
         "webware/messagebus-event": "^2.0.0-beta.5",
+        "webware/query-param-router": "1.0.x-dev",
         "webware/webware-console": "^1.0.0-alpha.7"
     },
     "require-dev": {
