@@ -25,12 +25,14 @@ yet, and no AsciiDoc syntax is supported.
 composer require phpiidoc/phpiidoc
 ```
 
-No stability flag is needed: phpiidoc and three of its runtime dependencies
-(`webware/message-bus`, `webware/messagebus-event` and `webware/webware-console`) are
-pre-release, so the consuming root must already allow pre-release stability, and the
-Webware application skeleton declares `"minimum-stability": "dev"` with
-`"prefer-stable": true`. Do not lower `minimum-stability` to `alpha`: it gains nothing for
-phpiidoc and narrows what the rest of the graph may resolve to.
+No stability flag is needed: phpiidoc and four of its runtime dependencies
+(`webware/message-bus`, `webware/messagebus-event`, `webware/webware-console` and
+`webware/query-param-router`) are pre-release, so the consuming root must already allow
+pre-release stability, and the Webware application skeleton declares
+`"minimum-stability": "dev"` with `"prefer-stable": true`. The router is constrained to the
+`1.0.x-dev` branch, so it tracks 1.0.x directly and is not pinned to a tag. Do not lower
+`minimum-stability` to `alpha`: it gains nothing for phpiidoc and narrows what the rest of
+the graph may resolve to.
 
 `composer.json` declares `Phpiidoc\ConfigProvider` under `extra.laminas.config-provider`,
 so a Mezzio or Laminas application merges the package config without further
