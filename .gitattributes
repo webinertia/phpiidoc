@@ -1,6 +1,8 @@
 /.gitattributes export-ignore
 /.github/ export-ignore
 /.gitignore export-ignore
+/config/ export-ignore
+/data/ export-ignore
 /.specify/ export-ignore
 /specs/ export-ignore
 /renovate.json export-ignore

@@ -14,6 +14,9 @@ declare(strict_types=1);
 
 namespace Phpiidoc;
 
+use Phpiidoc\Container\PhpiidocFactory;
+use Symfony\Component\Console\Application;
+
 /**
  * Wiring entry point for the package.
  *
@@ -28,7 +31,9 @@ final class ConfigProvider
     public function getDependencies(): array
     {
         return [
-            'factories' => [],
+            'factories' => [
+                Application::class => PhpiidocFactory::class,
+            ],
         ];
     }
 

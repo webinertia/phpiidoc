@@ -15,10 +15,12 @@ declare(strict_types=1);
 namespace PhpiidocTest;
 
 use Phpiidoc\ConfigProvider;
+use Phpiidoc\Container\PhpiidocFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Application;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
@@ -26,15 +28,17 @@ use PHPUnit\Framework\TestCase;
 final class ConfigProviderTest extends TestCase
 {
     #[Test]
-    public function providesAnEmptyDependencyFactoryMap(): void
+    public function providesTheApplicationFactory(): void
     {
         $expected = [
             'dependencies' => [
-                'factories' => [],
+                'factories' => [
+                    Application::class => PhpiidocFactory::class,
+                ],
             ],
         ];
 
-        self::assertSame($expected, new ConfigProvider()->__invoke());
+        static::assertSame($expected, new ConfigProvider()->__invoke());
     }
 
     #[Test]
@@ -42,7 +46,9 @@ final class ConfigProviderTest extends TestCase
     {
         static::assertSame(
             [
-                'factories' => [],
+                'factories' => [
+                    Application::class => PhpiidocFactory::class,
+                ],
             ],
             new ConfigProvider()->getDependencies(),
         );

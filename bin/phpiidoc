@@ -1,0 +1,68 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Application;
+
+/**
+ * The autoloader is resolved in order of authority. `__DIR__` is symlink
+ * resolved, so when this package is installed from a `path` repository with
+ * `"symlink": true` the resolved path points at the package's own checkout
+ * rather than the consumer's `vendor/`, and the classic
+ * `__DIR__ . '/../../../autoload.php'` probe misses. The autoloader handed to
+ * us by Composer's bin proxy is always the consuming project's, so it wins.
+ */
+$composerAutoloadPath = $GLOBALS['_composer_autoload_path'] ?? null;
+
+if (is_string($composerAutoloadPath)) {
+    // Invoked through vendor/bin: the consumer's autoloader, and therefore the
+    // consumer's configuration, is authoritative.
+    $autoload = $composerAutoloadPath;
+} elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
+    // Installed into a consumer's vendor/ without the bin proxy.
+    $autoload = __DIR__ . '/../../../autoload.php';
+} else {
+    // Running from this repository's own checkout.
+    $autoload = __DIR__ . '/../vendor/autoload.php';
+}
+
+if (! file_exists($autoload)) {
+    fwrite(STDERR, 'Cannot locate the Composer autoloader; run "composer install" first.' . PHP_EOL);
+
+    exit(1);
+}
+
+// Normalise before walking up. The bin proxy hands us "vendor/bin/../autoload.php",
+// and dirname() is purely textual, so it would strip the ".." rather than resolve it.
+$autoload = realpath($autoload);
+
+if ($autoload === false) {
+    fwrite(STDERR, 'Cannot resolve the Composer autoloader path.' . PHP_EOL);
+
+    exit(1);
+}
+
+require $autoload;
+
+// <project>/vendor/autoload.php becomes <project>/
+$projectRoot = dirname($autoload, 2) . '/';
+
+chdir($projectRoot);
+
+$containerFile = $projectRoot . 'config/container.php';
+
+if (! file_exists($containerFile)) {
+    fwrite(STDERR, sprintf('Cannot locate the container at %s', $containerFile) . PHP_EOL);
+
+    exit(1);
+}
+
+/** @var ContainerInterface $container */
+$container = require $containerFile;
+
+/** @var Application $application */
+$application = $container->get(Application::class);
+
+exit($application->run());
