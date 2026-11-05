@@ -14,8 +14,9 @@ declare(strict_types=1);
 
 namespace Phpiidoc;
 
-use Phpiidoc\Container\PhpiidocFactory;
-use Symfony\Component\Console\Application;
+use Phpiidoc\Console\Container\PhpiidocCommandFactory;
+use Phpiidoc\Console\PhpiidocCommand;
+use Webware\Console\ConsoleInterface;
 
 /**
  * Wiring entry point for the package.
@@ -32,7 +33,7 @@ final class ConfigProvider
     {
         return [
             'factories' => [
-                Application::class => PhpiidocFactory::class,
+                PhpiidocCommand::class => PhpiidocCommandFactory::class,
             ],
         ];
     }
@@ -41,7 +42,12 @@ final class ConfigProvider
     public function __invoke(): array
     {
         return [
-            'dependencies' => $this->getDependencies(),
+            'dependencies'          => $this->getDependencies(),
+            ConsoleInterface::class => [
+                'commands' => [
+                    'phpiidoc:build' => PhpiidocCommand::class,
+                ],
+            ],
         ];
     }
 }

@@ -14,21 +14,24 @@ declare(strict_types=1);
 
 namespace PhpiidocTestIntegration;
 
-use Phpiidoc\Container\PhpiidocFactory;
+use Phpiidoc\Console\Container\PhpiidocCommandFactory;
+use Phpiidoc\Console\PhpiidocCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Application;
+use Webware\MessageBus\MessageBusInterface;
 
 use function file_exists;
 use function unlink;
 
 /**
  * End-to-end proof that the aggregated configuration and the service manager
- * together build a container that can resolve the console application.
+ * together build a container that can resolve this package's console command.
  */
-#[CoversClass(PhpiidocFactory::class)]
+#[CoversClass(PhpiidocCommand::class)]
+#[CoversClass(PhpiidocCommandFactory::class)]
 final class ContainerWiringTest extends TestCase
 {
     private const CONFIG_CACHE_FILE = __DIR__ . '/../../data/cache/config-cache.php';
@@ -50,8 +53,26 @@ final class ContainerWiringTest extends TestCase
         static::assertInstanceOf(ContainerInterface::class, $this->buildContainer());
     }
 
+    /**
+     * Building the command forces the bus, the event dispatcher and the
+     * listener provider aggregate to resolve, so this is the whole wiring.
+     */
     #[Test]
-    public function resolvesTheConsoleApplicationNamedPhpiidoc(): void
+    public function resolvesTheBuildCommandFromTheRealContainer(): void
+    {
+        $container = $this->buildContainer();
+
+        static::assertInstanceOf(ContainerInterface::class, $container);
+
+        $command = $container->get(PhpiidocCommand::class);
+
+        static::assertInstanceOf(PhpiidocCommand::class, $command);
+        static::assertSame('phpiidoc:build', $command->getName());
+        static::assertInstanceOf(MessageBusInterface::class, $command->messageBus);
+    }
+
+    #[Test]
+    public function leavesTheConsoleApplicationWithTheConsoleProvider(): void
     {
         $container = $this->buildContainer();
 
@@ -60,7 +81,7 @@ final class ContainerWiringTest extends TestCase
         $application = $container->get(Application::class);
 
         static::assertInstanceOf(Application::class, $application);
-        static::assertSame('phpiidoc', $application->getName());
+        static::assertNotInstanceOf(PhpiidocCommand::class, $application);
     }
 
     #[Test]

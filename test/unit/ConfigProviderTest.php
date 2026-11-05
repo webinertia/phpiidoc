@@ -15,12 +15,14 @@ declare(strict_types=1);
 namespace PhpiidocTest;
 
 use Phpiidoc\ConfigProvider;
-use Phpiidoc\Container\PhpiidocFactory;
+use Phpiidoc\Console\Container\PhpiidocCommandFactory;
+use Phpiidoc\Console\PhpiidocCommand;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
+use Webware\Console\ConsoleInterface;
 
 #[CoversClass(ConfigProvider::class)]
 #[CoversMethod(ConfigProvider::class, '__invoke')]
@@ -28,12 +30,17 @@ use Symfony\Component\Console\Application;
 final class ConfigProviderTest extends TestCase
 {
     #[Test]
-    public function providesTheApplicationFactory(): void
+    public function providesTheCommandFactoryAndContributesTheCommand(): void
     {
         $expected = [
-            'dependencies' => [
+            'dependencies'          => [
                 'factories' => [
-                    Application::class => PhpiidocFactory::class,
+                    PhpiidocCommand::class => PhpiidocCommandFactory::class,
+                ],
+            ],
+            ConsoleInterface::class => [
+                'commands' => [
+                    'phpiidoc:build' => PhpiidocCommand::class,
                 ],
             ],
         ];
@@ -47,10 +54,29 @@ final class ConfigProviderTest extends TestCase
         static::assertSame(
             [
                 'factories' => [
-                    Application::class => PhpiidocFactory::class,
+                    PhpiidocCommand::class => PhpiidocCommandFactory::class,
                 ],
             ],
             new ConfigProvider()->getDependencies(),
+        );
+    }
+
+    #[Test]
+    public function doesNotBindTheSymfonyConsoleApplication(): void
+    {
+        $dependencies = new ConfigProvider()->getDependencies();
+
+        static::assertArrayNotHasKey(Application::class, $dependencies['factories']);
+    }
+
+    #[Test]
+    public function contributesTheBuildCommandUnderTheConsoleKey(): void
+    {
+        $config = new ConfigProvider()->__invoke();
+
+        static::assertSame(
+            PhpiidocCommand::class,
+            $config[ConsoleInterface::class]['commands']['phpiidoc:build'],
         );
     }
 }

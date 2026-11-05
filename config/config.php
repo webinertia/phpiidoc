@@ -8,8 +8,10 @@ use Laminas\ConfigAggregator\PhpFileProvider;
 use Laminas\Diactoros\ConfigProvider as DiactorosConfigProvider;
 use Laminas\ServiceManager\ConfigProvider as ServiceManagerConfigProvider;
 use Laminas\View\ConfigProvider as ViewConfigProvider;
+use Phly\EventDispatcher\ConfigProvider as DispatcherConfigProvider;
 use Phpiidoc\ConfigProvider;
 use Webware\Console\ConfigProvider as ConsoleConfigProvider;
+use Webware\Event\ConfigProvider as EventConfigProvider;
 use Webware\MessageBus\ConfigProvider as MessageBusConfigProvider;
 use Webware\MessageBus\Event\ConfigProvider as MessageBusEventConfigProvider;
 use Webware\Router\ConfigProvider as RouterConfigProvider;
@@ -28,12 +30,18 @@ $aggregator = new ConfigAggregator(
         DiactorosConfigProvider::class,
         ViewConfigProvider::class,
         MessageBusConfigProvider::class,
+        // Registers the concrete event dispatcher the event provider aliases.
+        DispatcherConfigProvider::class,
+        // Owns the event dispatcher alias and the listener provider the bus
+        // middleware resolve, so it loads before the bus event provider.
+        EventConfigProvider::class,
         MessageBusEventConfigProvider::class,
         RouterConfigProvider::class,
         // Wires the console Application and the command loader.
         ConsoleConfigProvider::class,
-        // Wires this package's own services, and overrides the console
-        // provider's Application factory with this package's own.
+        // Registers this package's own services and contributes its console
+        // command. The console Application and the command loader come from
+        // the console provider above.
         ConfigProvider::class,
         // Include cache configuration.
         new ArrayProvider($cacheConfig),
