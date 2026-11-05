@@ -21,8 +21,15 @@
         }
     },
     "require": {
+        "laminas/laminas-config-aggregator": "^1.20",
+        "laminas/laminas-diactoros": "^3.8",
+        "laminas/laminas-servicemanager": "^4.5",
+        "laminas/laminas-view": "^3.0",
         "php": "~8.4.1 || ~8.5.0",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "webware/message-bus": "^2.0.0-beta.7",
+        "webware/messagebus-event": "^2.0.0-beta.5",
+        "webware/webware-console": "^1.0.0-alpha.7"
     },
     "require-dev": {
         "infection/infection": "^0.35.0",
