@@ -36,21 +36,33 @@ final class ContainerWiringTest extends TestCase
 {
     private const CONFIG_CACHE_FILE = __DIR__ . '/../../data/cache/config-cache.php';
 
-    /**
-     * The aggregator caches the merged configuration on disk, so a stale cache
-     * would let these tests pass against configuration that no longer exists.
-     */
-    protected function setUp(): void
-    {
-        if (file_exists(self::CONFIG_CACHE_FILE)) {
-            unlink(self::CONFIG_CACHE_FILE);
-        }
-    }
-
     #[Test]
     public function buildsAContainerFromTheAggregatedConfiguration(): void
     {
         static::assertInstanceOf(ContainerInterface::class, $this->buildContainer());
+    }
+
+    #[Test]
+    public function exposesTheMergedConfigurationAsTheConfigService(): void
+    {
+        $container = $this->buildContainer();
+
+        static::assertInstanceOf(ContainerInterface::class, $container);
+
+        static::assertIsArray($container->get('config'));
+    }
+
+    #[Test]
+    public function leavesTheConsoleApplicationWithTheConsoleProvider(): void
+    {
+        $container = $this->buildContainer();
+
+        static::assertInstanceOf(ContainerInterface::class, $container);
+
+        $application = $container->get(Application::class);
+
+        static::assertInstanceOf(Application::class, $application);
+        static::assertNotInstanceOf(PhpiidocCommand::class, $application);
     }
 
     /**
@@ -71,27 +83,15 @@ final class ContainerWiringTest extends TestCase
         static::assertInstanceOf(MessageBusInterface::class, $command->messageBus);
     }
 
-    #[Test]
-    public function leavesTheConsoleApplicationWithTheConsoleProvider(): void
+    /**
+     * The aggregator caches the merged configuration on disk, so a stale cache
+     * would let these tests pass against configuration that no longer exists.
+     */
+    protected function setUp(): void
     {
-        $container = $this->buildContainer();
-
-        static::assertInstanceOf(ContainerInterface::class, $container);
-
-        $application = $container->get(Application::class);
-
-        static::assertInstanceOf(Application::class, $application);
-        static::assertNotInstanceOf(PhpiidocCommand::class, $application);
-    }
-
-    #[Test]
-    public function exposesTheMergedConfigurationAsTheConfigService(): void
-    {
-        $container = $this->buildContainer();
-
-        static::assertInstanceOf(ContainerInterface::class, $container);
-
-        static::assertIsArray($container->get('config'));
+        if (file_exists(self::CONFIG_CACHE_FILE)) {
+            unlink(self::CONFIG_CACHE_FILE);
+        }
     }
 
     private function buildContainer(): mixed

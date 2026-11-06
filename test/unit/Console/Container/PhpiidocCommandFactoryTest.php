@@ -36,9 +36,11 @@ final class PhpiidocCommandFactoryTest extends TestCase
         $messageBus->expects($this->never())->method('handle');
 
         $container = $this->createStub(ContainerInterface::class);
-        $container->method('get')->willReturnCallback(
-            static fn (string $id): MessageBusInterface => $messageBus,
-        );
+        $container
+            ->method('get')
+            ->willReturnCallback(
+                static fn(string $id): MessageBusInterface => $messageBus,
+            );
 
         $command = new PhpiidocCommandFactory()($container);
 

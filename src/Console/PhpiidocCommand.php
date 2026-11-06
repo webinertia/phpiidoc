@@ -31,7 +31,7 @@ use Webware\MessageBus\MessageBusInterface;
  * @api
  */
 #[AsCommand(
-    name: 'phpiidoc:build',
+    name       : 'phpiidoc:build',
     description: 'Build the documentation set for the current project',
 )]
 final class PhpiidocCommand extends Command

@@ -30,6 +30,25 @@ use Webware\Console\ConsoleInterface;
 final class ConfigProviderTest extends TestCase
 {
     #[Test]
+    public function contributesTheBuildCommandUnderTheConsoleKey(): void
+    {
+        $config = new ConfigProvider()->__invoke();
+
+        static::assertSame(
+            PhpiidocCommand::class,
+            $config[ConsoleInterface::class]['commands']['phpiidoc:build'],
+        );
+    }
+
+    #[Test]
+    public function doesNotBindTheSymfonyConsoleApplication(): void
+    {
+        $dependencies = new ConfigProvider()->getDependencies();
+
+        static::assertArrayNotHasKey(Application::class, $dependencies['factories']);
+    }
+
+    #[Test]
     public function providesTheCommandFactoryAndContributesTheCommand(): void
     {
         $expected = [
@@ -58,25 +77,6 @@ final class ConfigProviderTest extends TestCase
                 ],
             ],
             new ConfigProvider()->getDependencies(),
-        );
-    }
-
-    #[Test]
-    public function doesNotBindTheSymfonyConsoleApplication(): void
-    {
-        $dependencies = new ConfigProvider()->getDependencies();
-
-        static::assertArrayNotHasKey(Application::class, $dependencies['factories']);
-    }
-
-    #[Test]
-    public function contributesTheBuildCommandUnderTheConsoleKey(): void
-    {
-        $config = new ConfigProvider()->__invoke();
-
-        static::assertSame(
-            PhpiidocCommand::class,
-            $config[ConsoleInterface::class]['commands']['phpiidoc:build'],
         );
     }
 }
