@@ -72,6 +72,9 @@
         ]
     },
     "scripts": {
+        "console": "php bin/phpiidoc",
+        "console-menu": "php bin/phpiidoc menu",
+        "menu": "php bin/phpiidoc menu",
         "phpiidoc": "php bin/phpiidoc",
         "test": "phpunit --no-coverage --colors=always --testsuite \"unit test\"",
         "test-coverage": "phpunit --colors=always --coverage-clover clover.xml --coverage-text",

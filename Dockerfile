@@ -46,6 +46,7 @@ RUN set -eux; \
         unzip \
     ; \
     docker-php-ext-install -j"$(nproc)" \
+        bcmath \
         intl \
         pcntl \
         zip \
