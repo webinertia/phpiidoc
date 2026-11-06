@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Phpiidoc\Diagnostic;
 
+use function str_starts_with;
+
 /**
  * The stable reason codes a diagnostic carries.
  *

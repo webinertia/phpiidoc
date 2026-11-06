@@ -26,10 +26,11 @@ namespace Phpiidoc\Diagnostic;
  * ({@see ReasonCode::severity()}), so a diagnostic cannot contradict the code
  * it reports.
  *
- * `$sourcePath` and `$line` are optional together and are independent of each
- * other: a defect in a document with no file source has no path, and a defect
- * in a synthesised fragment has no line. `$target` carries the include target
- * or attribute name the diagnostic is about, when there is one.
+ * `$location` is optional because a defect may be found before any source
+ * position is known, and a document read from a string has no path at all.
+ * `$target` carries the include target or attribute name the diagnostic is
+ * about, when there is one, because that is the value a caller needs in order
+ * to act and it cannot be recovered from the message.
  *
  * @api
  */
@@ -38,8 +39,7 @@ final readonly class Diagnostic
     public function __construct(
         public ReasonCode $code,
         public string $message,
-        public ?string $sourcePath = null,
-        public ?int $line = null,
+        public ?SourceLocation $location = null,
         public ?string $target = null,
         public ?string $correctiveAction = null,
     ) {}
@@ -54,36 +54,19 @@ final readonly class Diagnostic
 
     public function isError(): bool
     {
-        return $this->code->severity() === Severity::Error;
+        return Severity::Error === $this->code->severity();
     }
 
     public function isWarning(): bool
     {
-        return $this->code->severity() === Severity::Warning;
+        return Severity::Warning === $this->code->severity();
     }
 
     /**
-     * Whether the diagnostic names both a source path and a line.
+     * Whether the diagnostic carries a source location.
      */
     public function hasLocation(): bool
     {
-        return $this->sourcePath !== null && $this->line !== null;
-    }
-
-    /**
-     * The source location as `path:line`, or the part of it that is known.
-     *
-     * Returns an empty string when neither a path nor a line is known. The
-     * format is a convenience for reporting and is not contract.
-     */
-    public function location(): string
-    {
-        if ($this->sourcePath === null) {
-            return $this->line === null ? '' : (string) $this->line;
-        }
-
-        return $this->line === null
-            ? $this->sourcePath
-            : $this->sourcePath . ':' . $this->line;
+        return null !== $this->location;
     }
 }
