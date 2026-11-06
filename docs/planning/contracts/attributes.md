@@ -22,7 +22,7 @@ those are recorded in `docs/planning/phpiidoc-cli-requirements.md`.
 
 ### Supplying attributes
 
-Attributes arrive in `RenderOptions::$attributes` as
+Attributes arrive in `ParseOptions::$attributes` as
 `array<string, string|false|null>`.
 
 | Supplied value | Meaning |
@@ -189,7 +189,7 @@ Resolution order, lowest to highest:
 2. Attributes derived from the backend and from the source path.
 3. Intrinsic attributes.
 4. Document header declarations.
-5. Option attributes from `RenderOptions::$attributes`.
+5. Option attributes from `ParseOptions::$attributes`.
 
 Steps 1 to 3 cannot be unset by a caller. Option attributes win over document header
 declarations; see settled decision D3 for the ruling and the consequence the owner accepted.
@@ -219,7 +219,7 @@ same key; it does not restrict which attributes a document may set.
    output; a consumer that does not gets the current clock.
 7. Unsetting an attribute is expressed as `false` or `null`, and the result is the attribute
    being absent, not the attribute being empty.
-8. An attribute supplied in `RenderOptions::$attributes` has the value the caller supplied,
+8. An attribute supplied in `ParseOptions::$attributes` has the value the caller supplied,
    whatever the document header declares for that key. A header declaration of a supplied key is
    ignored, not rejected.
 9. Adding a built-in attribute is a minor change. Removing one, changing one, or changing a

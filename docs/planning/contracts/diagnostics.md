@@ -138,25 +138,19 @@ The rule is about where the defect lives.
 `ParserInterface::parse()` never escalates. It returns the document with its diagnostics
 attached.
 
-### Turning diagnostics into a hard failure
+### Reporting a collection
 
 ```php
-$result = $renderer->render(Source::file($path), new RenderOptions(
-    baseDir: $docsRoot,
-    throwOnError: false,
-));
-
-if ($result->diagnostics->hasErrors()) {
-    foreach ($result->diagnostics->errors() as $diagnostic) {
+if ($diagnostics->hasErrors()) {
+    foreach ($diagnostics->errors() as $diagnostic) {
         report($diagnostic->code, $diagnostic->sourcePath, $diagnostic->line, $diagnostic->target);
     }
-
-    $result->throwIfErrors();
 }
 ```
 
-`throwIfErrors()` raises `RenderFailed` when the collection `hasErrors()`, and does nothing
-otherwise. It is idempotent and safe to call more than once.
+Turning that collection into a thrown exception belongs to the entry point that runs the parse
+and the render. That entry point, and the type it throws, are deferred with the renderer
+contracts, so this contract fixes collection and severity only.
 
 ### Include diagnostics
 

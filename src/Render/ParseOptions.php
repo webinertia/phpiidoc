@@ -19,11 +19,11 @@ use Phpiidoc\SafeMode;
 /**
  * The keys that govern reading and parsing, before any node is rendered.
  *
- * These are separated from {@see RenderOptions} because a different phase
- * consumes them. A parse entry point accepts this type alone, so it cannot be
- * handed a render-phase key and silently ignore it. The split is structural
- * rather than documentary: no key here is read by rendering, and no render key
- * is read by parsing.
+ * This type is the parse-phase option bag and the whole of it. A parse entry
+ * point accepts this type alone, so it cannot be handed a key belonging to a
+ * later phase and silently ignore it. The split is structural rather than
+ * documentary: every key here is read while reading or parsing, and no key
+ * here is read once the node tree exists.
  *
  * `$safeMode` defaults to {@see SafeMode::Safe}, which is not Ruby's default.
  * Ruby resolves the API safe mode to `SECURE` when the caller supplies none

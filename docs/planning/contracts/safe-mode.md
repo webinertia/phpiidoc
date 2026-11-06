@@ -44,7 +44,7 @@ enum SafeMode: int
 
 | Entry point | Default | Ruby's default |
 |---|---|---|
-| API: `RenderOptions::$safeMode` | `SafeMode::Safe` | `SafeMode::Secure` (`lib/asciidoctor/document.rb:319-327`) |
+| API: `ParseOptions::$safeMode` | `SafeMode::Safe` | `SafeMode::Secure` (`lib/asciidoctor/document.rb:319-327`) |
 | CLI | `SafeMode::Unsafe` when the CLI is built | `SafeMode::Unsafe` (`lib/asciidoctor/cli/options.rb:14`) |
 
 The API default is settled by the owner at `Safe`, a deliberate divergence from Ruby. The CLI
@@ -130,7 +130,7 @@ conditions, and only the second is a diagnostic.
    and reported, not silently re-rooted.
 2. At `Safe` and above, includes are processed. `Safe` is the lowest mode that both confines
    reads and inlines includes.
-3. `RenderOptions::$safeMode` defaults to `SafeMode::Safe`, so a caller that does not set a mode
+3. `ParseOptions::$safeMode` defaults to `SafeMode::Safe`, so a caller that does not set a mode
    gets working includes inside a jail.
 4. The mode actually in effect is visible on the result as `safe-mode-name` and
    `safe-mode-level`.
@@ -178,7 +178,7 @@ with no producer.
 
 ### D1. API safe-mode default is `Safe`
 
-Decided. `RenderOptions::$safeMode` defaults to `SafeMode::Safe`. Ruby's API default is
+Decided. `ParseOptions::$safeMode` defaults to `SafeMode::Safe`. Ruby's API default is
 `SafeMode::Secure` (`lib/asciidoctor/document.rb:319-327`); phpiidoc does not match it.
 
 Reasoning:
