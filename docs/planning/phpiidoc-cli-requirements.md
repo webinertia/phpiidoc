@@ -96,7 +96,7 @@ equivalent).
 
 | # | Oracle option | Oracle behaviour (options.rb line) | asciidoc-php status | Class | Requirement |
 |---|---|---|---|---|---|
-| 1 | `-b`, `--backend BACKEND` | Stores the raw value into `attributes['backend']`; no enum validation (51-54). Help names html5, xhtml5, docbook5, manpage, and notes extended converters (51-52). | Present (`Options.php:123-125`), no validation. | adopt | R13 |
+| 1 | `-b`, `--backend BACKEND` | Stores the raw value into `attributes['backend']`; no enum validation (51-54). Help names html5, xhtml5, docbook5, manpage, and notes extended converters (51-52). | Present (`Options.php:123-125`), no validation. | decide | R13, D8 |
 | 2 | `-d`, `--doctype DOCTYPE` | Validated by an OptionParser enum over `article book manpage inline` (55-58). | Present (`Options.php:127-129`) with no validation; the four values appear only in help text (`Application.php:28-29`). | adopt | R12 |
 | 3 | `-e`, `--embedded` | Sets `self[:standalone] = false` (59-61). Identical body to `-s` (79-81). | Absent. | adopt as alias | R10 |
 | 4 | `-o`, `--out-file FILE` | Sets `output_file`; help states `-` writes to STDOUT (62-64). | Present (`Options.php:131-133`); `-` handled at `Invoker.php:95-97,201-203`. | adopt | R22 |
@@ -107,8 +107,8 @@ equivalent).
 | 9 | `-n`, `--section-numbers` | Sets `self[:attributes]['sectnums'] = ''` (82-84). | Absent. | adopt | R11 |
 | 10 | `--eruby ERUBY` | Enum over `erb erubi erubis`; selects the eRuby implementation for custom ERB templates (85-88). | Absent. | out of scope | D3 |
 | 11 | `-a`, `--attribute name[=value]` | `attr.rstrip`, skip if empty or exactly `=`, then `partition '='` and store `attributes[name] = val`; never trims name or value; `@` is retained and signals soft-set (89-101). | Present but divergent (`Options.php:201-224`): strips every trailing `!`, stores `false`, `trim()`s both sides, no `@` handling, no empty or bare-`=` skip. | adopt | R3-R9 |
-| 12 | `-T`, `--template-dir DIR` | Repeatable; accumulates into `template_dirs`, coercing a scalar into an array first (102-111). | Absent. | adopt | R20, D7 |
-| 13 | `-E`, `--template-engine NAME` | Sets `template_engine`; loads the engine gem on demand (112-114). | Absent. | adopt | R21, D7 |
+| 12 | `-T`, `--template-dir DIR` | Repeatable; accumulates into `template_dirs`, coercing a scalar into an array first (102-111). | Absent. | decide | R20, D7 |
+| 13 | `-E`, `--template-engine NAME` | Sets `template_engine`; loads the engine gem on demand (112-114). | Absent. | out of scope | R21, D7 |
 | 14 | `-B`, `--base-dir DIR` | Sets `base_dir`; default is the source file's directory (115-117). | Present (`Options.php:139-141`). | adopt | R19 |
 | 15 | `-R`, `--source-dir DIR` | Sets `source_dir`; used to calculate the path inside the destination directory (118-120). | Absent. | adopt | R19 |
 | 16 | `-D`, `--destination-dir DIR` | Sets `destination_dir`; default is the source file's directory (121-123). | Present (`Options.php:135-137`) but flattens: `Invoker.php:213-216` writes `basename.html` directly into the destination, so nesting is lost. | adopt | R19 |
@@ -124,7 +124,7 @@ equivalent).
 | 26 | `-h`, `--help [TOPIC]` | Optional TOPIC. `manpage` dumps the man page, `syntax` prints the syntax reference, anything else prints the usage text; returns 0 in every branch (155-201). | Present without TOPIC (`Options.php:94-96`, `Application.php:105-108`); prints usage, returns 0. | decide | R25, D6 |
 | 27 | `-V`, `--version` | Prints version plus runtime environment and returns 0 (202-204, 313-320). | `--version` only (`Options.php:98-100`); the `-V` short form is absent. | adopt | R24 |
 
-Counts: 19 adopt, 1 adopt as alias, 3 decide, 4 out of scope.
+Counts: 16 adopt, 1 adopt as alias, 5 decide, 5 out of scope.
 
 Two behaviours outside the option table matter as much as any row:
 
@@ -164,8 +164,10 @@ defects the spec has to close, or consciously accept.
 9. **`-R` is absent and `-D` flattens.** Oracle computes the destination path relative to the
    source root (118-123). PHP writes every output directly into the destination directory
    (`Invoker.php:213-216`), so a tree of documents collapses into one directory.
-10. **No template mechanism.** `-T` and `-E` are absent (102-114), so there is no CLI path to
-    custom converter templates.
+10. **No template mechanism.** `-T` and `-E` are absent (102-114). Neither becomes a command
+    line requirement: custom templates reach the converter as a laminas-view template map
+    override supplied through configuration (R20), and engine selection is out of scope (R21)
+    because PHP has no engine-selection seam.
 11. **No log-level or failure-level control.** Both absent, so exit codes cannot be tuned and
     the WARN-versus-FATAL distinction does not exist (132-139).
 12. **Glob handling.** Oracle only globs when the literal path is not a file, and on no match
@@ -226,9 +228,11 @@ here. "Test" means the assertion the spec must be able to make, not a test writt
   the oracle's shape (options.rb:82-84), not to a boolean or `1`.
 - **R12.** `--doctype` is validated against `article`, `book`, `manpage`, `inline`, and an
   invalid value fails before any input is read. Whether abbreviations are accepted is D5.
-- **R13.** `--backend` is not validated. Its value is stored as the `backend` attribute and
-  passed through, matching the oracle (options.rb:51-54), and help lists html5, xhtml5,
-  docbook5, manpage.
+- **R13.** phpiidoc accepts `html5` for `--backend` and rejects any other value with a clear
+  error naming the supported set. Whether the flag exists at all in v1 is an owner decision
+  (D8), not a settled requirement. Grounds: html5 is the only hard requirement for v1 and the
+  only accepted parity loss is which converter strategies ship in v1 (architecture grilling,
+  section 4), so the flag's only legal v1 value is its own default.
 
 **Logging and exit codes**
 
@@ -254,10 +258,16 @@ here. "Test" means the assertion the spec must be able to make, not a test writt
   `-R`/`--source-dir` and `-D`/`--destination-dir` together preserve the path of a document
   relative to the source root when writing into the destination directory, so a tree of
   documents produces a tree of output files.
-- **R20.** `-T`/`--template-dir` is repeatable and accumulates in order. This is the oracle's
-  mechanism for custom styling (options.rb:102-111), and custom styling of the aggregate
-  GitHub Pages site is a stated project goal, so the option is not optional.
-- **R21.** `-E`/`--template-engine` selects the template engine by name, with a single value.
+- **R20.** Custom converter templates are supplied as a laminas-view template map override
+  through configuration, not as a directory of ERB templates passed on a command line. The
+  capability survives and the mechanism differs: the converter strategy owns laminas-view
+  (architecture grilling, section 3), and the template path is a proven design with a reference
+  implementation to copy (architecture grilling, section 10, finding 5). Whether any CLI
+  surface exists for this mechanism is an owner decision (D7), not a settled requirement.
+- **R21. Out of scope: template engine selection.** The oracle's `-E`/`--template-engine`
+  selects a Ruby templating engine and loads its gem on demand (options.rb:112-114). PHP has no
+  equivalent engine-selection seam: the engine is fixed by the converter strategy that owns
+  laminas-view. Recorded here as an out-of-scope finding, not as a requirement.
 
 **Input model**
 
@@ -317,8 +327,19 @@ prefix matching.
 `manpage` (options.rb:155-201). Decide whether phpiidoc implements topics, ignores them, or
 rejects them, and whether `manpage` output (troff) is in scope at all.
 
-**D7. Template mechanism.** R20 and R21 adopt the oracle's `-T` and `-E`, but phpiidoc renders
-html5 through `laminas-view`, which is not tilt and does not consume ERB or the
-`asciidoctor-backends` template layout. Decide whether the CLI exposes the oracle's flag names
-over a laminas-view resolver, or exposes a phpiidoc-specific mechanism. This decision changes
-what R20 and R21 can honestly require.
+**D7. Theming surface.** The oracle's `-T` requires the Tilt gem and points at a directory of
+custom converter templates that override the built-in converter (options.rb:102-111); its `-E`
+selects a Ruby templating engine and loads that engine's gem on demand (112-114). Neither
+mechanism exists in PHP. The converter strategy owns laminas-view (architecture grilling,
+section 3), so custom templates are a laminas-view template map override supplied through
+configuration (R20), and engine selection is out of scope because the engine is fixed by that
+strategy (R21). The template path itself is a proven design with a reference implementation to
+copy (architecture grilling, section 10, finding 5), so the capability survives while the
+mechanism differs. Decide whether any CLI surface exposes the template map override at all,
+and if so whether it reuses the oracle's flag names or a phpiidoc-specific mechanism.
+
+**D8. Backend flag.** html5 is the only hard requirement for v1, and the only accepted parity
+loss is which converter strategies ship in v1 (architecture grilling, section 4). That makes
+the only legal v1 `--backend` value the flag's own default, so the flag carries no choice in
+v1. R13 requires phpiidoc to accept `html5` and reject any other value with a clear error
+naming the supported set. Decide whether the flag exists at all in v1.
