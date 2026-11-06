@@ -4,8 +4,8 @@
 
 **Status** Draft for owner review
 
-**Consumer** `webinertia/asciidoc-php-multi-repo`, `src/Render/TocExtractor.php`, and any
-consumer that builds navigation or cross-page anchors
+**Consumer** Any caller that reads a parsed document or builds navigation from it. The retired
+`webinertia/asciidoc-php-multi-repo` is one example.
 
 ## Scope
 

@@ -4,8 +4,8 @@
 
 **Status** Draft for owner review
 
-**Consumer** `webinertia/asciidoc-php-multi-repo`, `src/Render/PageRenderer.php`,
-`contracts/site.schema.json`, `site.json`
+**Consumer** Any caller that chooses a safe mode or supplies a base directory. The retired
+`webinertia/asciidoc-php-multi-repo` is one example.
 
 ## Scope
 

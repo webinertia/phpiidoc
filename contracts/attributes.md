@@ -4,7 +4,8 @@
 
 **Status** Draft for owner review
 
-**Consumer** `webinertia/asciidoc-php-multi-repo`, `src/Render/AttributePolicy.php`
+**Consumer** Any caller that supplies attributes or relies on their precedence. The retired
+`webinertia/asciidoc-php-multi-repo` is one example.
 
 ## Scope
 
@@ -161,7 +162,7 @@ phpiidoc sets these itself.
 (`lib/asciidoctor.rb:238`). There is no entry for `html5`, so `pagewidth` is absent.
 
 The clock attributes are the only nondeterministic members of the set. A caller that needs
-reproducible output pins them, exactly as the consumer does today.
+reproducible output pins them.
 
 ### Attributes phpiidoc deliberately does not honour
 

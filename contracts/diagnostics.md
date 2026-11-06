@@ -4,8 +4,8 @@
 
 **Status** Draft for owner review
 
-**Consumer** `webinertia/asciidoc-php-multi-repo`, `src/Render/PageRenderer.php`,
-`src/Render/SiteConverter.php`
+**Consumer** Any caller that handles a render failure. The retired
+`webinertia/asciidoc-php-multi-repo` is one example.
 
 ## Scope
 
