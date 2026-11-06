@@ -34,15 +34,19 @@ use Phpiidoc\Node\NodeInterface;
  * expressed as a null transform, resolved through
  * {@see NodeInterface::getContext()}.
  *
- * A converter is asked to convert a node, not a node's content. The node
- * arrives whole, and the content is resolved by the converter at the moment it
- * needs it, by calling {@see \Phpiidoc\Node\BlockInterface::getContent()}. That
- * is what Ruby does: the template converter renders the template with the node
- * as its subject (`lib/asciidoctor/converter/template.rb:98`, `:108`, `:110`),
- * and the template reaches for `content`, which converts the child nodes at
- * that point (`lib/asciidoctor/abstract_block.rb:85-87`). A converter that were
- * handed pre-rendered child content could not make that choice, so the contract
- * is node in, string out.
+ * A converter is asked to convert a node, and the node arrives with its content
+ * already substituted. The parse phase ran the substitution pipeline; a
+ * converter that ran it again would substitute twice, and a second pass over
+ * entity text turns `&amp;` into `&amp;amp;`. What a converter still decides at
+ * the moment it renders is the layout around that content: whether a child is
+ * wrapped, what class it carries, and in what order the pieces appear. Ruby
+ * reaches the opposite arrangement because its template converter renders a
+ * template with the node as its subject
+ * (`lib/asciidoctor/converter/template.rb:98`, `:108`, `:110`) and the template
+ * then reaches for `content`, which substitutes and converts the children at
+ * that point (`lib/asciidoctor/abstract_block.rb:85-87`). phpiidoc moves the
+ * substitution half of that into the parse phase and leaves the layout half
+ * here, which is why the contract is still node in, string out.
  *
  * @api
  */

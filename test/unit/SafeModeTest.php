@@ -68,11 +68,11 @@ final class SafeModeTest extends TestCase
     }
 
     #[Test]
-    public function processesIncludesBelowServer(): void
+    public function processesIncludesBelowSecure(): void
     {
         static::assertTrue(SafeMode::Unsafe->processesIncludes());
         static::assertTrue(SafeMode::Safe->processesIncludes());
-        static::assertFalse(SafeMode::Server->processesIncludes());
+        static::assertTrue(SafeMode::Server->processesIncludes());
         static::assertFalse(SafeMode::Secure->processesIncludes());
     }
 }

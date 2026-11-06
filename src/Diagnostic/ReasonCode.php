@@ -122,6 +122,18 @@ enum ReasonCode: string
     /** An explicit section id is already in use. */
     case DuplicateSectionId = 'duplicate_section_id';
 
+    /**
+     * A delimited block ran to the end of the input without its closing
+     * delimiter.
+     *
+     * The block still exists and holds every line that was read, which is what
+     * Ruby does: it logs `unterminated <context> block` against the cursor where
+     * the block opened, sets a flag it never reads again, and returns the lines
+     * collected so far (`lib/asciidoctor/reader.rb:424-427`, `:71`). Nothing
+     * is discarded, so this is a warning rather than an error.
+     */
+    case UnterminatedDelimitedBlock = 'unterminated_delimited_block';
+
     /** An attribute reference names an attribute that is not set. */
     case UnresolvedAttributeReference = 'unresolved_attribute_reference';
 
@@ -139,6 +151,7 @@ enum ReasonCode: string
     {
         return match ($this) {
             self::DuplicateSectionId,
+            self::UnterminatedDelimitedBlock,
             self::UnresolvedAttributeReference,
             self::UnsupportedAttributeIgnored => Severity::Warning,
             default => Severity::Error,

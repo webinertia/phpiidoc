@@ -50,14 +50,26 @@ enum SafeMode: int
     case Safe = 1;
 
     /**
-     * Reads are jailed to the base directory. Include processing is forbidden,
-     * and the document may not set the attributes that affect conversion.
+     * Reads are jailed to the base directory and include processing is still
+     * performed, with every include confined to the jail.
+     *
+     * Ruby stops processing includes only at {@see self::Secure}
+     * (`lib/asciidoctor/reader.rb:1050`), so at this level an include is read
+     * normally and only the jail limits where from. phpiidoc's earlier reading of
+     * this level, that includes were forbidden here, was wrong.
      */
     case Server = 10;
 
     /**
-     * As {@see self::Server}, with `linkcss` forced on, `icons` disabled and
-     * attribute values capped at 4096 bytes.
+     * As {@see self::Server}, and include directives are no longer processed.
+     *
+     * Ruby does not drop them: it rewrites the directive into a link to the
+     * target so the reader can still follow it by hand
+     * (`lib/asciidoctor/reader.rb:1050-1054`). phpiidoc reports
+     * `include_disabled_by_safe_mode` instead, because a rewritten line is a
+     * silent hole in the rendered page that no build fails on. `linkcss` is
+     * forced on, `icons` is disabled and attribute values are capped at 4096
+     * bytes.
      */
     case Secure = 20;
 
@@ -99,12 +111,16 @@ enum SafeMode: int
     /**
      * Whether `include::[]` directives are processed.
      *
-     * {@see self::Server} and above forbid include processing, so every include
-     * directive at those levels produces `include_disabled_by_safe_mode` rather
-     * than being silently dropped.
+     * Only {@see self::Secure} and above stop it, which is Ruby's test
+     * (`lib/asciidoctor/reader.rb:1050`). At {@see self::Server} an include is
+     * still read, and the jail is what limits it, so an earlier reading of this
+     * level as "includes forbidden" was wrong.
+     *
+     * Where Ruby rewrites the directive into a link, phpiidoc reports
+     * `include_disabled_by_safe_mode`; see {@see self::Secure}.
      */
     public function processesIncludes(): bool
     {
-        return ! $this->isAtLeast(self::Server);
+        return ! $this->isAtLeast(self::Secure);
     }
 }

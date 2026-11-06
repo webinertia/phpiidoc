@@ -48,14 +48,28 @@ interface BlockInterface extends NodeInterface
     public function hasBlocks(): bool;
 
     /**
-     * The converted output of this node's children, joined into one string.
+     * This node's own content, substituted, as one string.
      *
-     * This is the value a node template reads when it places its children. Ruby
-     * converts each child and joins the results with a newline
-     * (`lib/asciidoctor/abstract_block.rb:85-87`), and the child conversion is
-     * what selects the converter for the child's own context.
+     * Own content means what the node holds directly, not what its children
+     * hold. Which content that is follows from the node's content model, and
+     * Ruby branches on it in one place (`lib/asciidoctor/block.rb:108-129`): a
+     * simple block joins its lines and substitutes the result, a verbatim block
+     * substitutes its lines and then strips leading and trailing blank lines, a
+     * raw block substitutes with its own group, and a compound block has no
+     * content of its own at all.
      *
-     * For a node with no children, returns the empty string.
+     * A compound node therefore returns the empty string. Its children are
+     * reached through {@see self::getBlocks()} and the caller joins them. Ruby
+     * joins them inside `content` by converting each child
+     * (`lib/asciidoctor/abstract_block.rb:85-87`), which is the mechanism the
+     * parse phase removes: joining is a rendering decision, it needs a converter,
+     * and the substitution that used to happen at the same moment has already
+     * happened by the time this value is read.
+     *
+     * The string is already substituted and must not be substituted again. It is
+     * empty for a node with no own content, which is the same answer a compound
+     * node gives; a caller that needs to tell those apart asks
+     * {@see self::hasBlocks()}.
      */
     public function getContent(): string;
 }
