@@ -20,7 +20,7 @@ It does not govern the text of exception messages, the CLI exit codes and stderr
 This contract records one settled owner decision that diverges from Ruby. Ruby treats every
 include defect as a log line and continues. phpiidoc treats every include defect as a hard
 diagnostic. The divergence is deliberate and permanent. See Include diagnostics and
-contracts/safe-mode.md.
+docs/planning/contracts/safe-mode.md.
 
 ## Surface
 
@@ -186,7 +186,7 @@ take the recover path. That turns a policy violation into an indistinguishable m
 
 phpiidoc therefore computes the candidate path, normalises it, tests it against `baseDir`, and
 emits `include_target_escapes_base_dir` before attempting any read. The ordering is contract and
-is stated identically in `contracts/safe-mode.md` D4 and in "Detection before resolution" there:
+is stated identically in `docs/planning/contracts/safe-mode.md` D4 and in "Detection before resolution" there:
 
 1. Resolve attribute references in the target.
 2. Build the candidate: the target itself when absolute, otherwise the directory of the including
@@ -255,7 +255,7 @@ changing a code's severity, or changing the raise-versus-collect rule is a break
 
 The always-fatal include policy is settled and permanent. It is not a bug to be reconciled with
 Ruby in a later release, and a future contributor who finds Ruby's warn-and-continue behaviour
-should not restore it. The rationale is in `contracts/safe-mode.md`.
+should not restore it. The rationale is in `docs/planning/contracts/safe-mode.md`.
 
 The separate treatment of an escaping include target is settled and permanent for the same reason.
 Ruby recovers such a path inside the jail and then reports it as missing
@@ -268,13 +268,13 @@ the code is still emitted and documented as deprecated, then removal in the next
 
 ## Settled owner decisions affecting this contract
 
-None recorded here. Two decisions that affect it are recorded in `contracts/safe-mode.md` and are
+None recorded here. Two decisions that affect it are recorded in `docs/planning/contracts/safe-mode.md` and are
 settled:
 
 - D1b, include failure severity: every include diagnostic is an `error` in every safe mode.
 - D4, escape detection timing: phpiidoc normalises the candidate, tests containment against
   `baseDir`, and emits `include_target_escapes_base_dir` before any read. The ordering in this
-  contract and in `contracts/safe-mode.md` is identical, and the code has a producer.
+  contract and in `docs/planning/contracts/safe-mode.md` is identical, and the code has a producer.
 
 ## Evidence
 

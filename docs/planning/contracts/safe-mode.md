@@ -13,8 +13,8 @@ This contract governs the safe-mode model: the four modes and their integer leve
 mode permits and forbids, which default applies at each entry point, and what `baseDir` means in
 relation to the mode.
 
-It does not govern the include reason codes, which are in `contracts/diagnostics.md`, or the
-attribute set, which is in `contracts/attributes.md`. It records two settled divergences from
+It does not govern the include reason codes, which are in `docs/planning/contracts/diagnostics.md`, or the
+attribute set, which is in `docs/planning/contracts/attributes.md`. It records two settled divergences from
 Ruby: include failure severity and escape detection timing.
 
 ## Surface
@@ -207,7 +207,7 @@ the failure this contract's `Safe` default prevents.
 
 ### D1b. Include failure severity
 
-Settled and recorded in `contracts/diagnostics.md`. All three of Ruby's non-fatal include paths
+Settled and recorded in `docs/planning/contracts/diagnostics.md`. All three of Ruby's non-fatal include paths
 become hard diagnostics in every mode. Safe mode governs which code applies, never the severity.
 
 ### D4. Escape detection timing

@@ -15,7 +15,7 @@ accessors on each kind, the table of contents structure, and the section id gene
 It does not govern how the parser is implemented, the internal block tree representation, how
 block content is stored (it is lazy), inline node types, or the rendering of any node. It does
 not govern attributes beyond the three that steer id generation (`idprefix`, `idseparator`,
-`sectids`); the full attribute set is in `contracts/attributes.md`.
+`sectids`); the full attribute set is in `docs/planning/contracts/attributes.md`.
 
 Section ids are in scope because a consumer builds links from them. The consumer that motivated
 this contract aborts the whole site build when a section that belongs in the table of contents
@@ -182,7 +182,7 @@ An explicit empty id (`[#]` or `[[]]`) is treated as no id, and generation appli
 id is used verbatim; it is not lowercased, prefixed, separated or filtered.
 
 If an explicit id duplicates one already in use, the parser keeps the id and emits the
-`duplicate_section_id` warning from `contracts/diagnostics.md`. It does not renumber.
+`duplicate_section_id` warning from `docs/planning/contracts/diagnostics.md`. It does not renumber.
 
 ### `sectids` gate
 
@@ -193,7 +193,7 @@ When the `sectids` attribute is unset, no ids are generated. A section then has
 Consumers build navigation from ids, and a document with unset `sectids` cannot be published.
 
 `idprefix` and `idseparator` are honoured as described above. They are document attributes, so
-option attributes win over document header declarations, per `contracts/attributes.md` D3. A
+option attributes win over document header declarations, per `docs/planning/contracts/attributes.md` D3. A
 consumer that pins them controls ids for every document it renders.
 
 ## Guarantees to consumers
@@ -238,7 +238,7 @@ strings in links and in cross-page anchors.
 ## Open owner decisions
 
 None. Attribute precedence, the decision that interacts with this contract, is settled in
-`contracts/attributes.md` D3: option attributes win, so a document header cannot change the ids
+`docs/planning/contracts/attributes.md` D3: option attributes win, so a document header cannot change the ids
 this contract pins.
 
 ## Evidence
