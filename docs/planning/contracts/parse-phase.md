@@ -17,8 +17,10 @@ It governs the contracts added for that phase and the amendments the phase force
 already existed.
 
 It does not govern conversion, rendering, presentation data, attribute precedence, diagnostics
-severity policy, or the CLI. Those are recorded in `html-output.md`, `render-entry.md`,
-`attributes.md`, `diagnostics.md` and `docs/planning/phpiidoc-cli-requirements.md`.
+severity policy, or the CLI. Attribute precedence and diagnostics severity policy are recorded in
+`attributes.md` and `diagnostics.md`, and the CLI in
+`docs/planning/phpiidoc-cli-requirements.md`. Conversion and rendering carry no contract in this
+tree; they are re-proposed separately, and nothing in this phase depends on their shape.
 
 ## The acceptance criterion
 
@@ -343,8 +345,9 @@ rewritten line is a silent hole that no build fails on.
 
 ### D2. The shape of seam 2 stays deferred
 
-Not decided by this contract, and deliberately not a precondition for it. `render-entry.md:304`
-records the deferral and it stands.
+Not decided by this contract, and deliberately not a precondition for it. The seam is the renderer
+side's question and the renderer contracts are not in this tree, so the deferral is recorded here
+and it stands.
 
 ## Deliberately not implemented in pass 1
 

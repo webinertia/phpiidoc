@@ -88,16 +88,15 @@ specs/001-asciidoc-parse-phase/
 ```text
 src/
 |-- Attribute/           # AttributesInterface, MutableAttributesInterface, AttributeSource
-|-- Converter/           # ConverterInterface, ConverterStrategyInterface
+|-- Converter/           # ConverterInterface
 |-- Diagnostic/          # Diagnostic, DiagnosticsInterface, DiagnosticCollectorInterface,
 |                        # ReasonCode, Severity, SourceLocation
-|-- Node/                # NodeInterface, BlockInterface, SectionInterface, InlineInterface,
-|                        # DocumentInterface, ListItemInterface, ContentModel
+|-- Node/                # NodeInterface, BlockInterface, SectionInterface, DocumentInterface,
+|                        # ListItemInterface, ContentModel
 |-- Parser/              # ParserInterface
 |-- Reader/              # ReaderInterface, ReaderFactoryInterface, ReadLinesOptions,
 |                        # ReadLinesBehaviour, IncludeResolverInterface
-|-- Render/              # RendererInterface, ParseOptions, RenderOptions, Source, TocEntry,
-|                        # PresentationDataInterface
+|-- Render/              # Source, ParseOptions
 |-- Substitutor/         # SubstitutorInterface, Substitution, SubstitutionGroup,
 |                        # SubstitutionContextInterface
 `-- SafeMode.php
