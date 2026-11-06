@@ -193,8 +193,8 @@ When the `sectids` attribute is unset, no ids are generated. A section then has
 Consumers build navigation from ids, and a document with unset `sectids` cannot be published.
 
 `idprefix` and `idseparator` are honoured as described above. They are document attributes, so
-whether a document header can set them depends on the attribute precedence decision in
-`contracts/attributes.md`.
+option attributes win over document header declarations, per `contracts/attributes.md` D3. A
+consumer that pins them controls ids for every document it renders.
 
 ## Guarantees to consumers
 
@@ -237,8 +237,9 @@ strings in links and in cross-page anchors.
 
 ## Open owner decisions
 
-None. The attribute precedence decision that interacts with this contract is open and is
-recorded in `contracts/attributes.md`, decision D3.
+None. Attribute precedence, the decision that interacts with this contract, is settled in
+`contracts/attributes.md` D3: option attributes win, so a document header cannot change the ids
+this contract pins.
 
 ## Evidence
 

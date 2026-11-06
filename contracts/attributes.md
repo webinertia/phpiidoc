@@ -187,16 +187,20 @@ Resolution order, lowest to highest:
 1. Built-in attributes.
 2. Attributes derived from the backend and from the source path.
 3. Intrinsic attributes.
-4. Option attributes from `RenderOptions::$attributes`.
-5. Document header declarations.
+4. Document header declarations.
+5. Option attributes from `RenderOptions::$attributes`.
 
-Steps 1 to 3 cannot be unset by a caller. Steps 4 and 5 are where precedence is undecided; see
-open decision D3.
+Steps 1 to 3 cannot be unset by a caller. Option attributes win over document header
+declarations; see settled decision D3 for the ruling and the consequence the owner accepted.
 
 Option attributes are stored as overrides. In Ruby they are treated as constants: the document
 records them as `@attribute_overrides` and refuses a later `set_attribute` for a locked name
-(`lib/asciidoctor/document.rb:296-315`, `:876-877`, `:924-926`). Ruby's effective order is
-therefore intrinsic, then option, then header, with option winning over header.
+(`lib/asciidoctor/document.rb:296-315`, `:876-877`, `:924-926`). phpiidoc applies the same rule,
+so the effective order is intrinsic, then header, then option.
+
+Precedence is not a whitelist. An attribute that the render call does not supply is still
+settable by the document header. The rule decides which value wins when both sources name the
+same key; it does not restrict which attributes a document may set.
 
 ## Guarantees to consumers
 
@@ -214,7 +218,10 @@ therefore intrinsic, then option, then header, with option winning over header.
    output; a consumer that does not gets the current clock.
 7. Unsetting an attribute is expressed as `false` or `null`, and the result is the attribute
    being absent, not the attribute being empty.
-8. Adding a built-in attribute is a minor change. Removing one, changing one, or changing a
+8. An attribute supplied in `RenderOptions::$attributes` has the value the caller supplied,
+   whatever the document header declares for that key. A header declaration of a supplied key is
+   ignored, not rejected.
+9. Adding a built-in attribute is a minor change. Removing one, changing one, or changing a
    precedence rule is a breaking change.
 
 ## Non-guarantees
@@ -236,36 +243,32 @@ The deliberately-unhonoured list may shrink in a minor release, because honourin
 that was previously ignored only changes output for documents that set it. It may not grow
 silently for an attribute that already worked.
 
-## Open owner decisions
+## Settled owner decisions
 
-### D3. Attribute precedence between options and the document header
+### D3. Option attributes win over the document header
 
-Steps 4 and 5 of the resolution order are undecided.
+Settled: option-supplied attributes win. A document header that declares a key the render call
+already supplies does not change that key's value.
 
-Options:
+This matches Ruby, where option attributes are locked against later writes
+(`lib/asciidoctor/document.rb:876-877`, `:924-926`).
 
-1. **Option attributes win**, matching Ruby (`lib/asciidoctor/document.rb:876-877`,
-   `:924-926`). Consequence: a caller can pin behaviour that a repository cannot override. The
-   consumer pins `source-highlighter` off and gets that guarantee for every repository. A
-   repository that sets `:idprefix:` in its header is ignored.
-2. **Document header wins.** Consequence: a repository controls its own rendering, but a caller
-   cannot pin anything, and every consumer-side policy attribute becomes advisory.
+The consequence the owner accepted is that a repository cannot override the site's rendering
+policy, and that this is the point of the rule rather than a side effect. A consumer can pin
+`idprefix`, `idseparator`, `sectids` and `source-highlighter` and know that no document header can
+move them. Cross-repository anchors stay stable, and no repository can switch on server-side
+highlighting that would tokenise its own Mermaid source.
 
-Two concrete cases decide this, and both are visible in the current consumer:
+A document header that sets one of those four is not an error. It is ignored. This is stated
+explicitly because an author will not guess it: a silently ignored `:idprefix:` in a repository
+header is exactly the kind of thing that gets diagnosed twice.
 
-- `source-highlighter`. The consumer sets it to `false` so the site highlights client-side
-  (`AttributePolicy.php:62`). If the header wins, a repository that enables a highlighter gets
-  highlighted Mermaid source, and the highlighting spans break the diagram loader that reads the
-  raw text.
-- `idprefix`, `idseparator`, `sectids`. The consumer sets none of them and relies on the
-  defaults. If the header wins, a repository that sets `:idprefix:` changes every id in that
-  repository, and every TOC link and cross-page anchor in it. The consumer would need a
-  validation pass that rejects a header setting any of the three.
+Because option-wins removes the risk, a consumer does not need a validation pass rejecting a
+header that sets `idprefix`, `idseparator`, `sectids` or `source-highlighter`. The work is deleted,
+not deferred.
 
-Recommendation: option attributes win, matching Ruby. It makes caller policy authoritative and
-keeps repository headers from silently changing navigation. A repository that genuinely needs a
-different `idprefix` can be accommodated later by an explicit per-repository option, which is a
-visible change, rather than by an invisible header.
+The rule is precedence, not a whitelist. An attribute the render call does not supply is still
+settable by the document header.
 
 ## Evidence
 

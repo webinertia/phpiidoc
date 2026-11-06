@@ -238,37 +238,38 @@ or `data-lang="mermaid"` for Mermaid.
 
 #### 10. `source-highlighter` is the first precedence case that bites
 
-**Requirement.** The consumer must rely on option-attribute precedence for
-`source-highlighter`, or validate that no document header sets it.
+**Requirement.** The consumer pins `source-highlighter` in the option attributes and relies on
+phpiidoc ignoring any document header declaration of that key.
 
 **Why.** `AttributePolicy.php:62` sets `source-highlighter` to `false` so the site highlights
-client-side. If a document header wins, a repository can enable a highlighter, phpiidoc emits
-highlighting spans inside a Mermaid block, and the diagram loader that reads the raw text no
-longer matches what it finds. `hasMermaid()`'s comment records that this destroys the diagram.
+client-side. Under option-wins (settled, `contracts/attributes.md` D3) a repository cannot enable
+a highlighter, so phpiidoc never emits highlighting spans inside a Mermaid block and the diagram
+loader that reads the raw text keeps matching. `hasMermaid()`'s comment records that tokenised
+Mermaid source destroys the diagram.
 
-**Conforming change.** If option attributes win (the recommendation in `contracts/attributes.md`,
-open decision D3), nothing changes. If the header wins, the consumer needs a validation pass that
-rejects a header setting `source-highlighter`.
+**Conforming change.** None. Option attributes already win, so the existing pin is sufficient and
+no validation pass is needed.
 
 **Evidence.** `AttributePolicy.php:62`, `PageRenderer.php:381`,
 `lib/asciidoctor/document.rb:876-877`, `:924-926`.
 
 #### 11. `idprefix`, `idseparator` and `sectids` are the second precedence case
 
-**Requirement.** The consumer must rely on option-attribute precedence for these three, or
-validate that no document header sets them.
+**Requirement.** The consumer pins these three in the option attributes and relies on phpiidoc
+ignoring any document header declaration of them.
 
-**Why.** The aggregator sets none of them and relies on the defaults. Ruby defaults `idprefix`
-and `idseparator` to `_` (`lib/asciidoctor/section.rb:198-226`). The aggregator builds TOC links
-and cross-page anchors from ids, so a repository that sets `:idprefix:` in its header changes
-every id in that repository if the header wins.
+**Why.** Ruby defaults `idprefix` and `idseparator` to `_` (`lib/asciidoctor/section.rb:198-226`).
+The aggregator builds TOC links and cross-page anchors from ids, so a repository header that sets
+`:idprefix:` would change every id in that repository if the header won. Under option-wins it
+cannot.
 
-**Conforming change.** If option attributes win, the consumer pins the three and is safe. If the
-header wins, the consumer needs a validation pass that rejects a document header setting any of
-them.
+**Conforming change.** Option-wins removes work rather than deferring it. The consumer does not
+need a validation pass rejecting a document header that sets any of the three, because such a
+declaration is ignored. The consumer pins the three and is safe. A header that sets them is not an
+error and is not reported.
 
 **Evidence.** `lib/asciidoctor/section.rb:198-226`, `lib/asciidoctor.rb:378`,
-`contracts/document-model.md`.
+`contracts/attributes.md` D3, `contracts/document-model.md`.
 
 #### 12. The per-repository build action is a second consumer
 
