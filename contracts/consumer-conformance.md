@@ -91,24 +91,26 @@ computation along with the pre-scan.
 
 **Evidence.** `PageRenderer.php:110`, `PageRenderer.php:228`, `PageRenderer.php:258-272`.
 
-#### 3. `IncludeOutsideRoot` has no producer today
+#### 3. `IncludeOutsideRoot` gets its producer from phpiidoc
 
-**Requirement.** A consumer must not treat the presence of a reason code as evidence that the
-condition is detected.
+**Requirement.** A consumer must wire `IncludeOutsideRoot` to phpiidoc's
+`include_target_escapes_base_dir` diagnostic, and must not keep its own containment check.
 
-**Why.** `ReasonCode::IncludeOutsideRoot` is declared at `src/Report/ReasonCode.php:19` and has
-no producer anywhere in the repository; the published report schema advertises it at
-`contracts/report.schema.json:97`. The pre-scan only tests `is_file`
-(`PageRenderer.php:237-240`) and never tests containment, and the retired resolver recovered
-escapes silently. Until phpiidoc emits the code, the report contract advertises a condition that
-cannot occur, and no test fails if containment breaks.
+**Why.** `ReasonCode::IncludeOutsideRoot` is declared at `src/Report/ReasonCode.php:19` and the
+published report schema advertises it at `contracts/report.schema.json:97`. Until phpiidoc, the
+code had no producer anywhere in the repository: the pre-scan only tested `is_file`
+(`PageRenderer.php:237-240`) and never tested containment, and the retired resolver recovered
+escapes silently. That history is recorded so nobody re-derives the old state as current. Under
+phpiidoc the code has a producer, because D4 in `contracts/safe-mode.md` is settled: the candidate
+path is normalised and tested against `baseDir` before any read, and an escaping target reports
+`include_target_escapes_base_dir` rather than `include_target_not_found`.
 
-**Conforming change.** Wire the code to phpiidoc's `include_target_escapes_base_dir` diagnostic
-(see `contracts/diagnostics.md`). That diagnostic exists only if open decision D4 in
-`contracts/safe-mode.md` is resolved in favour of detecting the escape before resolution.
+**Conforming change.** Map the diagnostic onto `IncludeOutsideRoot` (see the mapping table below).
+Delete the consumer's own containment logic. Do not reimplement the check: where phpiidoc detects
+a condition, the consumer deletes its detection rather than keeping a parallel one.
 
 **Evidence.** `src/Report/ReasonCode.php:19`, `contracts/report.schema.json:97`,
-`PageRenderer.php:237-240`.
+`PageRenderer.php:237-240`, `contracts/diagnostics.md`, `contracts/safe-mode.md` D4.
 
 #### 4. Deleting the pre-scan moves error attribution into phpiidoc
 
@@ -196,7 +198,8 @@ filters against configured heading levels. phpiidoc returns the same structure o
 (`contracts/document-model.md`). With `sectids` present by default (`lib/asciidoctor.rb:378`), a
 section without an id can only arise from unsetting `sectids` or from a malformed explicit
 anchor, both of which phpiidoc reports as diagnostics. A consumer-side "section has no id" check
-therefore becomes dead code in the same way `IncludeOutsideRoot` already is.
+therefore becomes dead code once `section_missing_id` is mapped, the same way `IncludeOutsideRoot`
+was dead before phpiidoc gave it a producer.
 
 **Conforming change.** Delete `TocExtractor` and read `$result->toc`. The aggregator's
 `toc-target-missing` code is re-pointed at phpiidoc's `section_missing_id` diagnostic (item 4).
@@ -336,7 +339,8 @@ citations are to `webinertia/asciidoc-php-multi-repo`.
 | The aggregator rewrites an absolute base into a cwd-relative one. | `PageRenderer.php:258-272` |
 | The aggregator's pre-scan computes a second base. | `PageRenderer.php:228` |
 | The pre-scan tests existence, not containment. | `PageRenderer.php:237-240` |
-| `IncludeOutsideRoot` is declared and unproduced. | `src/Report/ReasonCode.php:19` |
+| `IncludeOutsideRoot` was declared with no producer before phpiidoc. | `src/Report/ReasonCode.php:19` |
+| phpiidoc detects the escape before resolution, so the code gains a producer. | `lib/asciidoctor/path_resolver.rb:384-388`, `lib/asciidoctor/reader.rb:1263`, `contracts/safe-mode.md` D4 |
 | The report schema publishes `include-outside-root`. | `contracts/report.schema.json:97` |
 | The reason-code set is closed and schema-coupled. | `src/Report/ReasonCode.php:7-12` |
 | The aggregator raises through `failure()`. | `PageRenderer.php:353-355` |

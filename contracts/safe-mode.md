@@ -14,8 +14,8 @@ mode permits and forbids, which default applies at each entry point, and what `b
 relation to the mode.
 
 It does not govern the include reason codes, which are in `contracts/diagnostics.md`, or the
-attribute set, which is in `contracts/attributes.md`. It records one settled divergence from Ruby
-and one open decision.
+attribute set, which is in `contracts/attributes.md`. It records two settled divergences from
+Ruby: include failure severity and escape detection timing.
 
 ## Surface
 
@@ -76,9 +76,53 @@ then fails as a missing file (`lib/asciidoctor/path_resolver.rb:384-388`); the i
 passes only the target name, so includes always take that path (`lib/asciidoctor/reader.rb:1263`).
 The result is that a policy violation and a typo produce the same message.
 
-phpiidoc resolves the path, tests containment against `baseDir`, and emits
-`include_target_escapes_base_dir` before any read is attempted. The two conditions are never
-conflated. See open decision D4.
+phpiidoc does not recover. At `Safe` and above, every include target is normalised, tested for
+containment against `baseDir`, and reported as `include_target_escapes_base_dir` before any read
+is attempted. This is settled by D4.
+
+The order is fixed and is contract:
+
+1. Take the target as written and resolve attribute references in it.
+2. If the target is absolute, the candidate is the target. Otherwise the candidate is the
+   directory of the including file joined with the target (`lib/asciidoctor/reader.rb:1262-1263`).
+   The including file's directory, not `baseDir`, is the start for a relative target.
+3. Normalise the candidate as specified below.
+4. If the normalised candidate is not contained in the normalised `baseDir`, emit
+   `include_target_escapes_base_dir` and stop. No read is attempted.
+5. Only then test whether the target exists, and report `include_target_not_found` if it does not.
+
+Because step 4 precedes step 5, a target that both escapes the jail and does not exist reports the
+escape. The two conditions never collapse into one another.
+
+#### Normalisation is contract
+
+The containment test must normalise exactly as the resolver does, or the two disagree on some
+input: the check fires on a legal include, or misses an illegal one. The following rules are
+therefore part of this contract, not an implementation detail.
+
+1. **Separators.** Backslash is replaced by forward slash before anything else
+   (`lib/asciidoctor/path_resolver.rb:245-251`).
+2. **Partitioning.** Repeated slashes collapse, the path is split on `/`, and empty segments and
+   `.` segments are dropped (`lib/asciidoctor/path_resolver.rb:289-335`).
+3. **Root detection.** A path is absolute if it starts with `/`, or, on Windows, with a drive
+   letter or UNC prefix (`lib/asciidoctor/path_resolver.rb:114`, `:146-148`).
+4. **Parent references.** `..` removes the preceding segment. It never removes a segment that
+   belongs to the root (`lib/asciidoctor/path_resolver.rb:261-272`, `:431-445`).
+5. **Containment.** The candidate is inside `baseDir` when it equals `baseDir`, or when it starts
+   with `baseDir` followed by `/` (`lib/asciidoctor/path_resolver.rb:204-212`). A prefix match
+   without the separator is not containment, so `/docs-private` is not inside `/docs`.
+6. **Windows roots.** When the candidate's root differs from the jail's root, the path is outside
+   the jail regardless of segment arithmetic (`lib/asciidoctor/path_resolver.rb:418-426`). A
+   different drive letter is an escape, never a relative path.
+
+Both sides of the comparison are normalised by the same rules. Comparing a normalised candidate
+against a raw `baseDir`, or the reverse, is a defect.
+
+Containment is against `baseDir`, never against the including file's directory. A target that
+leaves the page directory and stays inside `baseDir` is the ordinary case that `baseDir` exists to
+permit: `include::../shared/attributes.adoc[]` from `docs/guide/page.adoc` is legal when `baseDir`
+is the repository root. "Escapes the page directory" and "escapes the jail" are different
+conditions, and only the second is a diagnostic.
 
 ## Guarantees to consumers
 
@@ -94,7 +138,11 @@ conflated. See open decision D4.
    every include directive, never a link and never a silent omission.
 6. A consumer that passes a mode explicitly gets exactly that mode. No mode is silently upgraded
    or downgraded.
-7. Changing a mode's permissions, changing a default, or changing the meaning of `baseDir` is a
+7. At `Safe` and above, an escaping include target produces `include_target_escapes_base_dir`,
+   never `include_target_not_found`, even when the target also does not exist.
+8. The containment test uses the same normalisation as path resolution, so a legal include is
+   never refused and an illegal one is never admitted.
+9. Changing a mode's permissions, changing a default, or changing the meaning of `baseDir` is a
    breaking change.
 
 ## Non-guarantees
@@ -117,6 +165,14 @@ The include divergence is permanent. Ruby treats three include failures as non-f
 errors in every mode. A future contributor who finds Ruby's warn-and-continue behaviour must not
 restore it. The rationale is that a rendered page with a silent hole is worse than a failed
 build, and the consumer currently compensates with a regex pre-scan it wants to delete.
+
+The escape divergence is permanent as well, and is a consequence of D4. Ruby recovers an escaping
+path by re-rooting it inside the jail, because `recover` defaults to true
+(`lib/asciidoctor/path_resolver.rb:384-388`), and the include reader never turns that off
+(`lib/asciidoctor/reader.rb:1263`). phpiidoc refuses the path and reports
+`include_target_escapes_base_dir` instead. Restoring Ruby's recovery is not a bug fix to be made
+later; it would make a policy violation indistinguishable from a typo and leave the reason code
+with no producer.
 
 ## Settled owner decisions
 
@@ -154,27 +210,34 @@ the failure this contract's `Safe` default prevents.
 Settled and recorded in `contracts/diagnostics.md`. All three of Ruby's non-fatal include paths
 become hard diagnostics in every mode. Safe mode governs which code applies, never the severity.
 
-## Open owner decisions
-
 ### D4. Escape detection timing
 
-phpiidoc currently specifies detection before resolution: compute the resolved path, test it
-against `baseDir`, emit `include_target_escapes_base_dir`, and never attempt the read. Ruby does
-the opposite and recovers, which is why an escape and a typo are indistinguishable in Ruby
-output.
+Decided: phpiidoc detects the escape before resolution and gives it its own reason code. It does
+not match Ruby's recovery.
 
-Options:
+Ruby's resolver defaults `recover` to true, so an escaping path is re-rooted inside the jail and
+then fails as a missing file (`lib/asciidoctor/path_resolver.rb:384-388`). The include reader
+passes only the target name, so includes always take that path
+(`lib/asciidoctor/reader.rb:1263`). Ruby's own output therefore cannot distinguish a policy
+violation from a typo.
 
-1. **Detect before resolution**, recommended. Consequence: `include_target_escapes_base_dir`
-   becomes reachable, the consumer's report code gets a producer, and a containment bug fails a
-   test. Cost: one extra containment check per include, and a slightly different diagnostic than
-   Ruby's for the same input.
-2. **Match Ruby and recover.** Consequence: an escape is reported as a missing file. The
-   distinct code stays unreachable, and a containment regression is invisible.
+phpiidoc normalises the candidate, tests containment against `baseDir`, emits
+`include_target_escapes_base_dir`, and never attempts the read. The reason code has a producer, a
+consumer's report schema advertises a condition that can actually occur, and a containment
+regression fails a test instead of silently rendering.
 
-Recommendation: option 1. A reason code with no producer is worse than no reason code, because a
-consumer's report schema advertises a condition that no run can ever produce, and no test can
-fail when containment breaks.
+The cost is one containment check per include and a diagnostic that differs from Ruby's for the
+same input. That is accepted. A reason code with no producer is worse than no reason code.
+
+This decision obliges three further things, all specified above in "Detection before
+resolution":
+
+- The escape test normalises the candidate exactly as the resolver does. The normalisation rules
+  are listed there as contract.
+- Containment is measured against `baseDir`, not against the page directory. Leaving the page
+  directory while staying inside `baseDir` is legal and is the reason `baseDir` exists.
+- A target that both escapes and does not exist reports `include_target_escapes_base_dir`, never
+  `include_target_not_found`. The two never collapse.
 
 ## Evidence
 
@@ -189,6 +252,13 @@ All citations are to the local Ruby Asciidoctor clone, version `2.1.0.alpha.0`.
 | Below `SAFE`, a relative start is joined to `base_dir` and no jail is set; at `SAFE` and above, `start` defaults to `base_dir` and `jail` is `base_dir`. | `lib/asciidoctor/abstract_node.rb:446-476`, especially `:466-475` |
 | The resolver recovers an escaping path by re-rooting it, because `recover` defaults to true. | `lib/asciidoctor/path_resolver.rb:384-388` |
 | The include reader passes only the target name, so includes take the recover path. | `lib/asciidoctor/reader.rb:1263` |
+| A relative include target starts at the directory of the including file, not at `base_dir`. | `lib/asciidoctor/reader.rb:1262-1263` |
+| Normalisation replaces backslashes with forward slashes. | `lib/asciidoctor/path_resolver.rb:245-251` |
+| Normalisation collapses repeated slashes, drops empty segments and drops `.` segments. | `lib/asciidoctor/path_resolver.rb:289-335` |
+| Normalisation resolves `..` by removing the preceding segment. | `lib/asciidoctor/path_resolver.rb:261-272`, `:431-445` |
+| Absolute path detection accepts a leading slash, a drive letter or a UNC prefix on Windows. | `lib/asciidoctor/path_resolver.rb:114`, `:146-148` |
+| Containment is equality or a prefix followed by a slash. | `lib/asciidoctor/path_resolver.rb:204-212` |
+| A candidate whose root differs from the jail root is outside the jail regardless of segments. | `lib/asciidoctor/path_resolver.rb:418-426` |
 | At `SERVER` and above, `copycss`, `source-highlighter` and `backend` become caller-only, `docdir` is cleared and `docfile` is made relative. | `lib/asciidoctor/document.rb:411-421` |
 | At `SECURE`, `max-attribute-value-size` defaults to 4096, `linkcss` is forced on and `icons` is disabled. | `lib/asciidoctor/document.rb:422-429` |
 | Below `SERVER`, `user-home` is set. | `lib/asciidoctor/document.rb:431` |

@@ -171,7 +171,7 @@ severity of any include diagnostic. It only governs which of the codes applies.
 | Safe mode does not process includes | `include_disabled_by_safe_mode` | Rewrites the directive to `link:target[role=include]` and continues (`reader.rb:1048-1054`). |
 | Depth limit set to zero | `include_disabled_by_depth_zero` | Disables include functionality entirely (`reader.rb:616-622`). |
 | URI include refused | `include_uri_not_allowed` | Warns and emits a link (`reader.rb:1251-1258`). |
-| Resolved path outside the jail | `include_target_escapes_base_dir` | Raises `SecurityError` from the path resolver (`abstract_node.rb:465-476`). |
+| Resolved path outside the jail | `include_target_escapes_base_dir` | The jail is `base_dir` (`abstract_node.rb:466-475`), but the resolver recovers by re-rooting the path inside the jail and then fails as not found (`path_resolver.rb:384-388`, `reader.rb:1263`). |
 
 The codes are separate rather than one `include_failed` code because the causes and the
 corrective actions differ. A missing file is fixed by creating or renaming it. A depth
@@ -183,9 +183,27 @@ Containment is checked before resolution, not after. Ruby's resolver defaults `r
 so an escaping path is silently re-rooted inside the jail and then fails as not found
 (`path_resolver.rb:384-388`); `reader.rb:1263` passes only the target name, so includes always
 take the recover path. That turns a policy violation into an indistinguishable missing file.
-phpiidoc therefore computes the resolved path, tests it against `baseDir`, and emits
-`include_target_escapes_base_dir` before attempting any read. A missing file and an escape are
-never the same diagnostic. See `contracts/safe-mode.md`, open decision D4.
+
+phpiidoc therefore computes the candidate path, normalises it, tests it against `baseDir`, and
+emits `include_target_escapes_base_dir` before attempting any read. The ordering is contract and
+is stated identically in `contracts/safe-mode.md` D4 and in "Detection before resolution" there:
+
+1. Resolve attribute references in the target.
+2. Build the candidate: the target itself when absolute, otherwise the directory of the including
+   file joined with the target.
+3. Normalise the candidate and `baseDir` by the same rules.
+4. If the candidate is not contained in `baseDir`, emit `include_target_escapes_base_dir` and
+   stop.
+5. Only then test existence, and emit `include_target_not_found` if it is missing.
+
+Consequences that are contract:
+
+- A target that both escapes the jail and does not exist reports the escape, never not-found.
+  The two codes never collapse into one another.
+- Containment is against `baseDir`, not the including file's directory. A target that leaves the
+  page directory and stays inside `baseDir` is legal and produces no diagnostic.
+- Detection applies at `Safe` and above, where the jail exists. Below `Safe` there is no jail, so
+  `include_target_escapes_base_dir` cannot occur.
 
 The corrective actions are fixed per code:
 
@@ -237,17 +255,26 @@ changing a code's severity, or changing the raise-versus-collect rule is a break
 
 The always-fatal include policy is settled and permanent. It is not a bug to be reconciled with
 Ruby in a later release, and a future contributor who finds Ruby's warn-and-continue behaviour
-should not restore it. The rationale is in contracts/safe-mode.md.
+should not restore it. The rationale is in `contracts/safe-mode.md`.
+
+The separate treatment of an escaping include target is settled and permanent for the same reason.
+Ruby recovers such a path inside the jail and then reports it as missing
+(`lib/asciidoctor/path_resolver.rb:384-388`, `lib/asciidoctor/reader.rb:1263`). phpiidoc reports
+`include_target_escapes_base_dir` and never falls back to `include_target_not_found`. A future
+contributor must not reintroduce the collapse.
 
 Deprecation of a code follows the renderer's general rule: one minor release of overlap in which
 the code is still emitted and documented as deprecated, then removal in the next minor release.
 
-## Open owner decisions
+## Settled owner decisions affecting this contract
 
-None in this contract. Two decisions that affect it are recorded elsewhere: include failure
-severity is settled above and in `contracts/safe-mode.md`, and escape-detection timing is open as
-D4 in `contracts/safe-mode.md`. Until D4 is resolved in favour of detecting the escape before
-resolution, `include_target_escapes_base_dir` has no producer.
+None recorded here. Two decisions that affect it are recorded in `contracts/safe-mode.md` and are
+settled:
+
+- D1b, include failure severity: every include diagnostic is an `error` in every safe mode.
+- D4, escape detection timing: phpiidoc normalises the candidate, tests containment against
+  `baseDir`, and emits `include_target_escapes_base_dir` before any read. The ordering in this
+  contract and in `contracts/safe-mode.md` is identical, and the code has a producer.
 
 ## Evidence
 
@@ -262,7 +289,7 @@ All citations are to the local Ruby Asciidoctor clone, version `2.1.0.alpha.0`.
 | At `SECURE` and above the directive is not processed and is rewritten to `link:target[role=include]`. | `lib/asciidoctor/reader.rb:1048-1054` |
 | A URI include without `allow-uri-read` warns and emits a link. | `lib/asciidoctor/reader.rb:1251-1258` |
 | An unresolved attribute in the target warns and produces an `Unresolved directive` replacement. | `lib/asciidoctor/reader.rb:1028-1042` |
-| A resolved path outside the jail raises `SecurityError`. | `lib/asciidoctor/abstract_node.rb:446-476`, especially `:465-476` |
+| At `SAFE` and above the jail is `base_dir`; the resolver raises `SecurityError` for a path outside it only when `recover` is false, and defaults `recover` to true. | `lib/asciidoctor/abstract_node.rb:466-475`, `lib/asciidoctor/path_resolver.rb:384-388` |
 | The resolver recovers an escaping path by re-rooting it inside the jail instead of raising, because `recover` defaults to true. | `lib/asciidoctor/path_resolver.rb:384-388` |
 | The include reader passes only the target name, so includes always take the recover path. | `lib/asciidoctor/reader.rb:1263` |
 | An unknown block type raises rather than continuing. | `lib/asciidoctor/parser.rb:905-909` |
