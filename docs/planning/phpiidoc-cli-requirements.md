@@ -304,7 +304,7 @@ becomes R1 and must be tested.
 
 **D2. `--concurrency`.** It has no oracle equivalent. Options: drop it and build a tree
 sequentially; keep it as a phpiidoc extension with a documented default; or defer it until the
-build pipeline needs it. R26 depends on this answer.
+build sequence needs it. R26 depends on this answer.
 
 **D3. Capability parity, and the shape of the flag names.** The oracle is a Ruby binary whose
 flags are `-b`, `-d`, `-a`, `-s` and so on. phpiidoc is a Symfony console command, where an
