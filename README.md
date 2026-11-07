@@ -26,7 +26,7 @@ composer require phpiidoc/phpiidoc
 ```
 
 No stability flag is needed: phpiidoc and three of its runtime dependencies
-(`webware/message-bus`, `webware/messagebus-event` and `webware/webware-console`) are
+(`webware/query-param-router`, `webware/webware-console` and `webware/webware-event`) are
 pre-release, so the consuming root must already allow pre-release stability, and the
 Webware application skeleton declares `"minimum-stability": "dev"` with
 `"prefer-stable": true`. Do not lower `minimum-stability` to `alpha`: it gains nothing for

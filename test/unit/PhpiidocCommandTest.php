@@ -21,7 +21,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
-use Webware\MessageBus\MessageBusInterface;
 
 #[CoversClass(PhpiidocCommand::class)]
 #[CoversMethod(PhpiidocCommand::class, 'execute')]
@@ -30,9 +29,7 @@ final class PhpiidocCommandTest extends TestCase
     #[Test]
     public function returnsSuccessWhenExecuted(): void
     {
-        $messageBus = $this->createStub(MessageBusInterface::class);
-
-        $tester = new CommandTester(new PhpiidocCommand($messageBus));
+        $tester = new CommandTester(new PhpiidocCommand());
 
         static::assertSame(Command::SUCCESS, $tester->execute([]));
     }

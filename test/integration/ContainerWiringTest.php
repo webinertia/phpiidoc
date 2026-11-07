@@ -20,8 +20,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Console\Application;
-use Webware\MessageBus\MessageBusInterface;
 
 use function file_exists;
 use function unlink;
@@ -66,8 +66,8 @@ final class ContainerWiringTest extends TestCase
     }
 
     /**
-     * Building the command forces the bus, the event dispatcher and the
-     * listener provider aggregate to resolve, so this is the whole wiring.
+     * Building the command proves the console wiring, and resolving the event
+     * dispatcher proves the stage listeners have something to register against.
      */
     #[Test]
     public function resolvesTheBuildCommandFromTheRealContainer(): void
@@ -80,7 +80,10 @@ final class ContainerWiringTest extends TestCase
 
         static::assertInstanceOf(PhpiidocCommand::class, $command);
         static::assertSame('phpiidoc:build', $command->getName());
-        static::assertInstanceOf(MessageBusInterface::class, $command->messageBus);
+        static::assertInstanceOf(
+            EventDispatcherInterface::class,
+            $container->get(EventDispatcherInterface::class),
+        );
     }
 
     /**
