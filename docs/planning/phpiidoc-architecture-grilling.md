@@ -38,7 +38,9 @@ much less capable agent and is consulted, never trusted.
 ## 2. Hard constraints (owner, stated as WILL BE)
 
 - Html5 rendering **will be** handled by `laminas-view`.
-- Execution scaffolding **will be** provided by `webware/message-bus`.
+- Execution scaffolding **will be** provided by `webware/webware-event` on PSR-14. An
+  orchestrator owns the stage sequence, dispatches a stage event, and listeners
+  registered against that event do the work.
 - The system **will be** built to interfaces and their contracts.
 - `laminas-config-aggregator` **will** handle configuration aggregation.
 - `laminas-servicemanager` **will be** the PSR-11 container and will manage service
@@ -61,19 +63,21 @@ required, built to interfaces.
 ```
 webware-console entry
   -> CLI command executed
-  -> message bus middleware pipeline
-  -> PSR-14 dispatch from pre middleware
-  -> pipeline stages (Reader, Parser, Substitutor, ...)
-  -> command handler
+  -> orchestrator owns the stage sequence
+  -> PSR-14 stage event dispatched for the current stage (read, substitute, parse,
+     convert, emit)
+  -> listeners registered against that event do the work for the stage
   -> converter strategy
   -> rendered HTML document
      or a laminas-view model seeded with the rendered HTML when handing to the site builder
 ```
 
-### Pipeline versus events
+### Stage events and listeners
 
-- The middleware pipeline is the execution pipeline.
-- PSR-14 events are for cross-cutting concerns and side-channel communication.
+- The orchestrator owns the stage sequence and dispatches one PSR-14 stage event per
+  stage.
+- Stage events are the execution mechanism, not a side channel. Listeners registered
+  against a stage event do the work for that stage.
 - **Any layer may dispatch events.**
 - **Templates are the one place events are forbidden** during rendering. The exception
   is a listener that is itself doing the rendering, which is not how laminas-view
@@ -89,7 +93,7 @@ types, blocks, or whatever the node model ends up being called.
 
 ### Converter selection
 
-The bus handler strategy selects which converter strategy is called. There is no
+The convert stage selects which converter strategy is called. There is no
 `CompositeConverter`-style decorator wrapping the seam; the converter strategy owns
 `laminas-view`.
 
@@ -215,15 +219,15 @@ harvesting requires triage.
 
 These are explicitly open. SpecKit must carry them as unknowns, not assumptions.
 
-1. **Which components are middleware and which are middleware collaborators.** Not
-   answerable by discussion; it needs the scaffold to react to.
+1. **Which components are listeners and which are collaborators the listeners call.**
+   Not answerable by discussion; it needs the scaffold to react to.
 2. **Whether a template receives a node, or a node plus already-substituted string
    content.** This is the AST question reframed for laminas-view, and it decides what
    the template map keys on.
 3. **Whether Substitutors is its own subsystem with its own acceptance gate**, or a
    phase inside the Parser. Depends on the lowered representation chosen.
-4. **How the bus handler selects the converter strategy and how that strategy is
-   decoupled from the command handler.**
+4. **How the convert stage selects the converter strategy and how that strategy is
+   decoupled from the command.**
 
 ---
 
@@ -232,8 +236,8 @@ These are explicitly open. SpecKit must carry them as unknowns, not assumptions.
 1. **phpiidoc is a harness, not code.** `src/` holds exactly one file,
    `ConfigProvider.php`, returning empty `factories`. Two tests, both for it. The
    dependencies are already correct: config-aggregator, servicemanager, laminas-view,
-   diactoros, psr/container, message-bus, messagebus-event, webware-console. There is
-   nothing to migrate; "foundation" means infrastructure, not accumulated code.
+   diactoros, psr/container, webware-console, webware-event. There is nothing to
+   migrate; "foundation" means infrastructure, not accumulated code.
 2. **Asciidoctor has no AST.** It has a block tree whose `content` is a String, with
    substitutions applied lazily at convert time. `Inline` is a leaf holding already
    substituted text. The oracle's semantics are string-and-lazy, which is why building
@@ -264,6 +268,11 @@ These are explicitly open. SpecKit must carry them as unknowns, not assumptions.
 
 ## 11. Superseded decisions
 
+- **The message bus is dropped.** `webware/message-bus` and `webware/messagebus-event`
+  are no longer dependencies, and no middleware contract is written or shared.
+  `webware/webware-event` is the sole event dependency, and the build sequence is
+  driven by the stage events described above. "Pipeline" is no longer vocabulary for
+  that sequence.
 - **D7 (rendering never dispatches) is reversed.** Any layer may dispatch events. Only
   templates are forbidden, because laminas-view does not render through listeners.
   View helpers may depend on the dispatcher.
