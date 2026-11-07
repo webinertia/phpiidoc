@@ -18,16 +18,17 @@ namespace Phpiidoc\Node;
  * The state that every node of a parsed document exposes.
  *
  * A node is a section, a block or an inline element. The three are distinguished
- * by {@see self::getContext()}, which returns the AsciiDoc context token as a
+ * by the `$context` property, which holds the AsciiDoc context token as a
  * lowercase string: `document`, `section`, `paragraph`, `listing`, `literal`,
  * `pass`, `admonition`, `example`, `sidebar`, `open`, `quote`, `verse`, `ulist`,
  * `olist`, `dlist`, `table`, `image`, `toc`, `floating_title`, `page_break`,
  * `thematic_break`, and the `inline_*` forms for inline elements.
  *
- * Ruby keeps the same four accessors on every node: the attribute hash, the
+ * Ruby keeps the same four members on every node: the attribute hash, the
  * context, the id and the node name, all on `AbstractNode`
- * (`lib/asciidoctor/abstract_node.rb:12-24`). The node name is the context as a
- * String, assigned from the context in the constructor (`:36`).
+ * (`lib/asciidoctor/abstract_node.rb:12-24`). The `$context` property mirrors
+ * Ruby's `context` Symbol and its `node_name` String, the latter assigned from
+ * the context in the constructor (`:36`).
  *
  * Source position is a widening of the Ruby surface. Ruby tracks it on blocks
  * only, through `source_location` (`lib/asciidoctor/abstract_block.rb:29`) and
@@ -67,8 +68,19 @@ interface NodeInterface
      * Ruby's `context` is a Symbol and `node_name` is the same value as a String
      * (`lib/asciidoctor/abstract_node.rb:15`, `:24`, `:36`). phpiidoc exposes the
      * string form, so `'section'` and not `:section`.
+     *
+     * A concrete node supplies the property with the context token as the
+     * initializer:
+     *
+     *     public private(set) string $context = 'section';
+     *
+     * The initializer makes the value effectively read-only: the declaring class
+     * owns it, and an assignment from outside its scope is an error. Because the
+     * declaration here is abstract, a class that omits the property does not
+     * load at all, which is why the token is declared on the interface rather
+     * than inherited as a default from a base class.
      */
-    public function getContext(): string;
+    public string $context { get; }
 
     /**
      * The source file this node came from, or `null` when it is unknown.

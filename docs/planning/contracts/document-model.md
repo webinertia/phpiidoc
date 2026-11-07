@@ -34,7 +34,7 @@ interface NodeInterface
 
     public function getTitle(): ?string;
 
-    public function getContext(): string;
+    public string $context { get; }
 
     public function getSourcePath(): ?string;
 
@@ -75,7 +75,7 @@ interface BlockInterface extends NodeInterface
 }
 ```
 
-`getContext()` returns the AsciiDoc context token as a lowercase string: `document`, `section`,
+The `$context` property holds the AsciiDoc context token as a lowercase string: `document`, `section`,
 `paragraph`, `listing`, `literal`, `pass`, `admonition`, `example`, `sidebar`, `open`, `quote`,
 `verse`, `ulist`, `olist`, `dlist`, `table`, `image`, `toc`, `floating_title`, `page_break`,
 `thematic_break`.
@@ -90,7 +90,7 @@ interface BlockInterface extends NodeInterface
 | `getTitle()` | `NodeInterface` | `?string` | The section title as source text with inline substitutions applied, or `null`. |
 | `getBlocks()` | `DocumentInterface`, `SectionInterface`, `BlockInterface` | `list<NodeInterface>` | Direct children only. Empty list, never `null`. |
 | `getDocTitle()` | `DocumentInterface` | `?string` | `null` when the document has no title. |
-| `getContext()` | `NodeInterface` | `string` | Token from the list above. |
+| `$context` | `NodeInterface` | `string` | Get-only property. Token from the list above. |
 | `getSourcePath()` | `NodeInterface` | `?string` | File the node came from. `null` when unknown. |
 | `getSourceLine()` | `NodeInterface` | `?int` | One-based. `null` when `sourcemap` is off or the position is unknown. |
 

@@ -32,7 +32,7 @@ use Phpiidoc\Node\NodeInterface;
  * to apply and defaults to the node's own node name, which is the context as a
  * string (`lib/asciidoctor/abstract_node.rb:24`, `:36`). Here that default is
  * expressed as a null transform, resolved through
- * {@see NodeInterface::getContext()}.
+ * {@see NodeInterface::$context}.
  *
  * A converter is asked to convert a node, not a node's content. The node
  * arrives whole, and the content is resolved by the converter at the moment it
