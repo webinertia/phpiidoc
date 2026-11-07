@@ -7,7 +7,7 @@ The behavioural evidence, with file and line citations against Ruby Asciidoctor,
 `docs/planning/contracts/parse-phase.md`; this document does not repeat those citations except where
 a decision turns on one.
 
-## D5: The parse phase runs the substitution pipeline
+## D5: The parse phase runs the substitutions
 
 **Decision**: `ParserInterface::parse()` runs the substitutions, and the document it returns holds
 prepared content. The converter performs no text substitution.

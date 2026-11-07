@@ -15,7 +15,7 @@ html."
 ## Scope
 
 This feature is the AsciiDoc parse phase of phpiidoc: reading and preprocessing a source, parsing it
-into the document tree, running the substitution pipeline, and returning a document whose content a
+into the document tree, running the substitutions, and returning a document whose content a
 converter renders without re-parsing anything. The conversion itself, and the laminas-view layer
 above it, are out of scope. The reasoning record for every requirement below is
 `docs/planning/contracts/parse-phase.md`.
@@ -278,7 +278,7 @@ file and line citations, is in `docs/planning/contracts/parse-phase.md`.
 
 **S7 Prepare**
 
-- **FR-030**: The phase MUST run the substitution pipeline during parsing, and the document handed to
+- **FR-030**: The phase MUST run the substitutions during parsing, and the document handed to
   a converter MUST hold already substituted content.
 - **FR-031**: The phase MUST apply the normal substitution group to simple content, the verbatim
   group to verbatim content, and no substitution to raw content.

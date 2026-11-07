@@ -8,7 +8,7 @@
 
 Build the AsciiDoc parse phase: read a source, preprocess includes and conditionals against the live
 attribute store, parse the header, sections, blocks, lists and tables into the document tree, run the
-substitution pipeline so that content is prepared rather than raw, and return a document that an
+substitutions so that content is prepared rather than raw, and return a document that an
 HTML5 converter renders by walking the tree. The phase is expressed as the fourteen contracts already
 committed under `src/` plus the four amended ones, and the reasoning for every boundary is in
 `docs/planning/contracts/parse-phase.md`.

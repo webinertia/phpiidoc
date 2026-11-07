@@ -90,7 +90,7 @@ check: a finding on new code is never baselined. Infection is capped at 4 thread
 
 ## Run one stage
 
-Each stage has its own tests, named for the stage. To iterate on the substitution pipeline without
+Each stage has its own tests, named for the stage. To iterate on substitutions without
 parsing a document:
 
 ```powershell

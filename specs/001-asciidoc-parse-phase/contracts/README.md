@@ -26,7 +26,7 @@ They are not duplicated here for three reasons:
 | `src/Diagnostic/DiagnosticCollectorInterface.php` | all | Where the phase reports. |
 | `src/Node/ContentModel.php` | S5, S7 | Which substitution group applies to a block. |
 | `src/Node/ListItemInterface.php` | S6 | The item node, including the description tuple. |
-| `src/Substitutor/SubstitutorInterface.php` | S7 | The substitution pipeline entry point. |
+| `src/Substitutor/SubstitutorInterface.php` | S7 | The entry point for running substitutions. |
 | `src/Substitutor/SubstitutionContextInterface.php` | S7 | The state one substitution pass needs. |
 | `src/Substitutor/Substitution.php` | S7 | The closed set of substitutions. |
 | `src/Substitutor/SubstitutionGroup.php` | S7 | The named ordered groups. |

@@ -92,7 +92,7 @@ adds text, type and target.
 
 Invariants:
 
-- An inline is produced by the substitution pipeline when a converter asks the substitutor for
+- An inline is produced by the substitutor when a converter asks for
   markup it must build itself, such as an image or an anchor. It is never produced by the block
   parser.
 - `getType()` names the inline construct and `getTarget()` is the construct's target, both empty for
