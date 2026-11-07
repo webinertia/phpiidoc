@@ -12,8 +12,6 @@ use Phly\EventDispatcher\ConfigProvider as DispatcherConfigProvider;
 use Phpiidoc\ConfigProvider;
 use Webware\Console\ConfigProvider as ConsoleConfigProvider;
 use Webware\Event\ConfigProvider as EventConfigProvider;
-use Webware\MessageBus\ConfigProvider as MessageBusConfigProvider;
-use Webware\MessageBus\Event\ConfigProvider as MessageBusEventConfigProvider;
 use Webware\Router\ConfigProvider as RouterConfigProvider;
 
 // To enable or disable caching, set the `ConfigAggregator::ENABLE_CACHE` boolean
@@ -29,13 +27,11 @@ $aggregator = new ConfigAggregator(
         ServiceManagerConfigProvider::class,
         DiactorosConfigProvider::class,
         ViewConfigProvider::class,
-        MessageBusConfigProvider::class,
         // Registers the concrete event dispatcher the event provider aliases.
         DispatcherConfigProvider::class,
-        // Owns the event dispatcher alias and the listener provider the bus
-        // middleware resolve, so it loads before the bus event provider.
+        // Owns the event dispatcher alias and the listener provider, so it
+        // loads after the concrete dispatcher it aliases.
         EventConfigProvider::class,
-        MessageBusEventConfigProvider::class,
         RouterConfigProvider::class,
         // Wires the console Application and the command loader.
         ConsoleConfigProvider::class,

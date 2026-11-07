@@ -21,7 +21,6 @@ use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Webware\MessageBus\MessageBusInterface;
 
 #[CoversClass(PhpiidocCommandFactory::class)]
 #[CoversMethod(PhpiidocCommandFactory::class, '__invoke')]
@@ -29,22 +28,12 @@ use Webware\MessageBus\MessageBusInterface;
 final class PhpiidocCommandFactoryTest extends TestCase
 {
     #[Test]
-    public function buildsTheCommandAroundTheBusTheContainerSupplies(): void
+    public function buildsTheCommandFromTheContainer(): void
     {
-        // The command only carries the bus, so building it must not dispatch.
-        $messageBus = $this->createMock(MessageBusInterface::class);
-        $messageBus->expects($this->never())->method('handle');
-
         $container = $this->createStub(ContainerInterface::class);
-        $container
-            ->method('get')
-            ->willReturnCallback(
-                static fn(string $id): MessageBusInterface => $messageBus,
-            );
 
         $command = new PhpiidocCommandFactory()($container);
 
         static::assertInstanceOf(PhpiidocCommand::class, $command);
-        static::assertSame($messageBus, $command->messageBus);
     }
 }

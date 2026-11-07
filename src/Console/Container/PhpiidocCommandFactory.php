@@ -15,26 +15,15 @@ declare(strict_types=1);
 namespace Phpiidoc\Console\Container;
 
 use Phpiidoc\Console\PhpiidocCommand;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
-use Symfony\Component\Console\Exception\LogicException;
-use Webware\MessageBus\MessageBusInterface;
 
 /**
  * @internal
  */
 final readonly class PhpiidocCommandFactory
 {
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws LogicException When the command definition is not valid.
-     */
     public function __invoke(ContainerInterface $container): PhpiidocCommand
     {
-        return new PhpiidocCommand(
-            messageBus: $container->get(MessageBusInterface::class),
-        );
+        return new PhpiidocCommand();
     }
 }
