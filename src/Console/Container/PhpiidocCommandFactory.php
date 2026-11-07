@@ -16,12 +16,16 @@ namespace Phpiidoc\Console\Container;
 
 use Phpiidoc\Console\PhpiidocCommand;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Exception\LogicException;
 
 /**
  * @internal
  */
 final readonly class PhpiidocCommandFactory
 {
+    /**
+     * @throws LogicException When the command definition is not valid.
+     */
     public function __invoke(ContainerInterface $container): PhpiidocCommand
     {
         return new PhpiidocCommand();
